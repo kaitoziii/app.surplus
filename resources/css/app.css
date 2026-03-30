@@ -9,3 +9,7 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+.input {
+    @apply w-full border border-gray-300 p-3 rounded focus:outline-none focus:ring-2 focus:ring-teal-400;
+}
