@@ -16,6 +16,14 @@ return Application::configure(basePath: dirname(__DIR__))
             'isAdmin' => \App\Http\Middleware\IsAdmin::class,
         ]);
     })
+
+    ->withMiddleware(function (Middleware $middleware) {
+        $middleware->alias([
+            'isAdmin' => \App\Http\Middleware\IsAdmin::class,
+        ]);
+        $middleware->redirectGuestsTo('/login');
+    })
+    
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();
