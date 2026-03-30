@@ -11,7 +11,7 @@ class AdminController extends Controller
     public function dashboard()
     {
         $totalMerchants  = Store::count();
-        $totalConsumers  = User::where('role', 'consumer')->count();
+        $totalConsumers  = User::where('role', 'buyer')->count();
         $pendingMerchants = Store::where('status', 'pending')->count();
         $pendingList     = Store::where('status', 'pending')
                                 ->with('user')
@@ -35,7 +35,7 @@ class AdminController extends Controller
 
     public function consumers()
     {
-        $consumers = User::where('role', 'consumer')->latest()->paginate(10);
+        $consumers = User::where('role', 'buyer')->latest()->paginate(10);
         return view('admin.consumers', compact('consumers'));
     }
 
