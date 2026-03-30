@@ -8,7 +8,7 @@ Route::get('/', function () {
 });
 
 // Admin Routes
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/merchants', [AdminController::class, 'merchants'])->name('merchants');
     Route::get('/consumers', [AdminController::class, 'consumers'])->name('consumers');
