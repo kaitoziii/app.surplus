@@ -95,13 +95,30 @@ class AdminController extends Controller
 
     public function approveMerchant($id)
     {
-        Store::findOrFail($id)->update(['status' => 'approved']);
+        Store::findOrFail($id)->update([
+            'status'           => 'approved',
+            'rejection_reason' => null,
+        ]);
         return back()->with('success', 'Merchant berhasil disetujui.');
     }
 
-    public function rejectMerchant($id)
+    public function rejectMerchant(Request $request, $id)
     {
-        Store::findOrFail($id)->update(['status' => 'rejected']);
+        $request->validate([
+            'rejection_reason' => 'required|string|max:500',
+        ]);
+
+        Store::findOrFail($id)->update([
+            'status'           => 'rejected',
+            'rejection_reason' => $request->rejection_reason,
+        ]);
+
         return back()->with('success', 'Merchant berhasil ditolak.');
+    }
+
+    public function showMerchant($id)
+    {
+        $merchant = Store::with('user')->findOrFail($id);
+        return view('admin.merchant-detail', compact('merchant'));
     }
 }

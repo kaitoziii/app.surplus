@@ -13,6 +13,9 @@ class Store extends Model
         'latitude',
         'longitude',
         'status',
+        'siup_nib',
+        'siup_nib_file',
+        'rejection_reason',
     ];
 
     public function user()
