@@ -36,6 +36,14 @@
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke-width="2"/><circle cx="9" cy="7" r="4" stroke-width="2"/></svg>
                 Data Consumer
             </a>
+            <a href="{{ route('admin.categories.index') }}"
+               class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs
+               {{ request()->routeIs('admin.categories.*') ? 'bg-green-50 text-green-700 font-medium' : 'text-gray-500 hover:bg-gray-50' }}">
+               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-5 5a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a2 2 0 012-2z"/>
+               </svg>
+                    Kategori Produk
+             </a>
             <a href="{{ route('admin.transactions') }}"
                class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs
                {{ request()->routeIs('admin.transactions') ? 'bg-green-50 text-green-700 font-medium' : 'text-gray-500 hover:bg-gray-50' }}">
