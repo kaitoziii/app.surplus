@@ -25,4 +25,5 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
     Route::get('/consumers', [AdminController::class, 'consumers'])->name('consumers');
     Route::post('/merchants/{id}/approve', [AdminController::class, 'approveMerchant'])->name('merchants.approve');
     Route::post('/merchants/{id}/reject', [AdminController::class, 'rejectMerchant'])->name('merchants.reject');
+    Route::get('/transactions', [AdminController::class, 'transactions'])->name('transactions');
 });
