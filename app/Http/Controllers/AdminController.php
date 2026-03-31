@@ -72,11 +72,25 @@ class AdminController extends Controller
         return view('admin.consumers', compact('consumers'));
     }
 
-    public function transactions()
+    public function transactions(Request $request)
     {
-        $transactions = Transaction::with(['user', 'product'])
-            ->latest()->paginate(15);
-        return view('admin.transactions', compact('transactions'));
+        $query = Transaction::with(['user', 'product'])->latest();
+
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+        if ($request->date) {
+            $query->whereDate('created_at', $request->date);
+        }
+
+        $transactions  = $query->paginate(15);
+        $countPickedUp = Transaction::where('status', 'picked_up')->count();
+        $countActive   = Transaction::whereIn('status', ['pending', 'confirmed'])->count();
+        $countCancelled = Transaction::where('status', 'cancelled')->count();
+
+        return view('admin.transactions', compact(
+            'transactions', 'countPickedUp', 'countActive', 'countCancelled'
+        ));
     }
 
     public function approveMerchant($id)
