@@ -66,9 +66,24 @@ class AdminController extends Controller
         return view('admin.merchants', compact('merchants'));
     }
 
-    public function consumers()
+    public function consumers(Request $request)
     {
-        $consumers = User::where('role', 'buyer')->latest()->paginate(10);
+        $query = User::where('role', 'buyer')->latest();
+
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                ->orWhere('email', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->status === 'restricted') {
+            $query->where('is_restricted', true);
+        } elseif ($request->status === 'active') {
+            $query->where('is_restricted', false);
+        }
+
+        $consumers = $query->paginate(10);
         return view('admin.consumers', compact('consumers'));
     }
 
