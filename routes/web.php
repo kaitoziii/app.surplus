@@ -28,6 +28,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
     Route::post('/merchants/{id}/reject', [AdminController::class, 'rejectMerchant'])->name('merchants.reject');
     Route::get('/merchants/{id}', [AdminController::class, 'showMerchant'])->name('merchants.show');
     Route::get('/transactions', [AdminController::class, 'transactions'])->name('transactions');
+    Route::get('/transactions/export', [AdminController::class, 'exportTransactions'])->name('transactions.export');
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
     Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
     Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');

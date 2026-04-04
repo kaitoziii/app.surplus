@@ -45,8 +45,18 @@
         <a href="{{ route('admin.transactions') }}"
             class="text-xs text-red-400 hover:text-red-600">Reset filter</a>
         @endif
-        <div class="ml-auto text-xs text-gray-400">
-            Menampilkan {{ $transactions->count() }} dari {{ $transactions->total() }} transaksi
+        <div class="ml-auto flex items-center gap-3">
+            <span class="text-xs text-gray-400">
+                Menampilkan {{ $transactions->count() }} dari {{ $transactions->total() }} transaksi
+            </span>
+            <a href="{{ route('admin.transactions.export', request()->query()) }}"
+                class="flex items-center gap-1.5 text-xs bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                Export CSV
+            </a>
         </div>
     </form>
 </div>

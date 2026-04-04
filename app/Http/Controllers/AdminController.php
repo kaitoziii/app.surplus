@@ -31,21 +31,19 @@ class AdminController extends Controller
         $weekRevenue       = Transaction::whereBetween('created_at', [$weekStart, $weekEnd])
                                 ->where('status', '!=', 'cancelled')->sum('price_paid');
 
-        // Grafik 7 hari
         $last7Days = collect(range(6, 0))->map(function ($daysAgo) {
             $date  = Carbon::today()->subDays($daysAgo);
             $total = Transaction::whereDate('created_at', $date)->count();
             return [
                 'date'  => $date->format('d M'),
                 'total' => $total,
-                'waste' => round($total * 0.3, 1), // estimasi: 1 transaksi = 0.3 kg food waste diselamatkan
+                'waste' => round($total * 0.3, 1),
             ];
         });
 
-        // AI Insight: dampak lingkungan
         $totalConfirmed      = Transaction::where('status', 'picked_up')->count();
-        $estimatedWasteSaved = round($totalConfirmed * 0.3, 1); // kg
-        $co2Saved            = round($estimatedWasteSaved * 2.4, 1); // 1 kg food waste = 2.4 kg CO2
+        $estimatedWasteSaved = round($totalConfirmed * 0.3, 1);
+        $co2Saved            = round($estimatedWasteSaved * 2.4, 1);
         $savedFoodPercent    = $totalMerchants > 0
             ? min(100, round(($totalConfirmed / max($totalMerchants, 1)) * 10))
             : 0;
@@ -73,7 +71,7 @@ class AdminController extends Controller
         if ($request->search) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
-                ->orWhere('email', 'like', '%' . $request->search . '%');
+                  ->orWhere('email', 'like', '%' . $request->search . '%');
             });
         }
 
@@ -98,14 +96,66 @@ class AdminController extends Controller
             $query->whereDate('created_at', $request->date);
         }
 
-        $transactions  = $query->paginate(15);
-        $countPickedUp = Transaction::where('status', 'picked_up')->count();
-        $countActive   = Transaction::whereIn('status', ['pending', 'confirmed'])->count();
+        $transactions   = $query->paginate(15);
+        $countPickedUp  = Transaction::where('status', 'picked_up')->count();
+        $countActive    = Transaction::whereIn('status', ['pending', 'confirmed'])->count();
         $countCancelled = Transaction::where('status', 'cancelled')->count();
 
         return view('admin.transactions', compact(
             'transactions', 'countPickedUp', 'countActive', 'countCancelled'
         ));
+    }
+
+    public function exportTransactions(Request $request)
+    {
+        $query = Transaction::with(['user', 'product'])->latest();
+
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+        if ($request->date) {
+            $query->whereDate('created_at', $request->date);
+        }
+
+        $transactions = $query->get();
+        $filename     = 'laporan-transaksi-' . now()->format('Y-m-d') . '.csv';
+
+        $headers = [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ];
+
+        $callback = function () use ($transactions) {
+            $file = fopen('php://output', 'w');
+
+            fputcsv($file, [
+                'ID', 'Consumer', 'Email', 'Produk',
+                'Qty', 'Harga Asli', 'Harga Bayar',
+                'Diskon (%)', 'Hemat', 'Status',
+                'Pickup Code', 'Tanggal',
+            ]);
+
+            foreach ($transactions as $trx) {
+                fputcsv($file, [
+                    $trx->id,
+                    $trx->user->name    ?? '-',
+                    $trx->user->email   ?? '-',
+                    $trx->product->name ?? '-',
+                    $trx->quantity,
+                    $trx->original_price_snapshot,
+                    $trx->price_paid,
+                    $trx->discount_applied,
+                    $trx->savings_amount,
+                    $trx->status,
+                    $trx->pickup_code ?? '-',
+                    $trx->created_at->format('d M Y H:i'),
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     public function approveMerchant($id)
