@@ -27,6 +27,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
     Route::post('/merchants/{id}/approve', [AdminController::class, 'approveMerchant'])->name('merchants.approve');
     Route::post('/merchants/{id}/reject', [AdminController::class, 'rejectMerchant'])->name('merchants.reject');
     Route::get('/merchants/{id}', [AdminController::class, 'showMerchant'])->name('merchants.show');
+    Route::get('/transactions/export-pdf', [AdminController::class, 'exportTransactionsPdf'])->name('transactions.export-pdf');
     Route::get('/transactions', [AdminController::class, 'transactions'])->name('transactions');
     Route::get('/transactions/export', [AdminController::class, 'exportTransactions'])->name('transactions.export');
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');

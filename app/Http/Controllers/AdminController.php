@@ -8,6 +8,7 @@ use App\Models\Store;
 use App\Models\Transaction;
 use App\Models\Product;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdminController extends Controller
 {
@@ -156,6 +157,29 @@ class AdminController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    public function exportTransactionsPdf(Request $request)
+    {
+        $query = Transaction::with(['user', 'product'])->latest();
+
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+        if ($request->date) {
+            $query->whereDate('created_at', $request->date);
+        }
+
+        $transactions   = $query->get();
+        $totalRevenue   = $transactions->where('status', '!=', 'cancelled')->sum('price_paid');
+        $totalSavings   = $transactions->sum('savings_amount');
+        $generatedAt    = now()->format('d M Y, H:i');
+
+        $pdf = Pdf::loadView('admin.pdf.transactions', compact(
+            'transactions', 'totalRevenue', 'totalSavings', 'generatedAt'
+        ))->setPaper('a4', 'landscape');
+
+        return $pdf->download('laporan-transaksi-' . now()->format('Y-m-d') . '.pdf');
     }
 
     public function approveMerchant($id)
