@@ -2,9 +2,13 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+<<<<<<< HEAD
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoryController;
 use Laravel\Socialite\Facades\Socialite;
+=======
+use App\Http\Controllers\CartController;
+>>>>>>> feature/cart-stock-checkout
 
 /*
  |--------------------------------------------------------------------------
@@ -76,3 +80,10 @@ Route::get('/auth/google/callback', function () {
 
     dd($user); // test dulu
 });
+
+Route::post('/cart/add', [CartController::class , 'add']);
+Route::get('/cart', [CartController::class , 'index']);
+Route::put('/cart/{id}', [CartController::class , 'update']);
+Route::delete('/cart/{id}', [CartController::class , 'delete']);
+
+Rou
