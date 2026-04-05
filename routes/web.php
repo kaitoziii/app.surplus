@@ -2,19 +2,51 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CategoryController;
+use Laravel\Socialite\Facades\Socialite;
 
 /*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
+ |--------------------------------------------------------------------------
+ | Web Routes
+ |--------------------------------------------------------------------------
+ */
 
 // 🔥 HALAMAN UTAMA
 Route::get('/', function () {
     return view('welcome');
 });
 
-// 🔥 TAMBAHAN: MERCHANT REGISTER (INI YANG KAMU BUTUH)
+// Login sementara untuk testing (hapus setelah Melysa selesai Auth)
+Route::get('/dev-login', function () {
+    auth()->loginUsingId(6); // ID user admin
+    return redirect('/admin/dashboard');
+});
+
+Route::get('/dev-logout', function () {
+    auth()->logout();
+    return 'Logged out';
+});
+
+// Admin Routes
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(function () {
+    Route::get('/dashboard', [AdminController::class , 'dashboard'])->name('dashboard');
+    Route::get('/merchants', [AdminController::class , 'merchants'])->name('merchants');
+    Route::get('/consumers', [AdminController::class , 'consumers'])->name('consumers');
+    Route::post('/merchants/{id}/approve', [AdminController::class , 'approveMerchant'])->name('merchants.approve');
+    Route::post('/merchants/{id}/reject', [AdminController::class , 'rejectMerchant'])->name('merchants.reject');
+    Route::get('/merchants/{id}', [AdminController::class , 'showMerchant'])->name('merchants.show');
+    Route::get('/transactions/export-pdf', [AdminController::class , 'exportTransactionsPdf'])->name('transactions.export-pdf');
+    Route::get('/transactions', [AdminController::class , 'transactions'])->name('transactions');
+    Route::get('/transactions/export', [AdminController::class , 'exportTransactions'])->name('transactions.export');
+    Route::get('/categories', [CategoryController::class , 'index'])->name('categories.index');
+    Route::post('/categories', [CategoryController::class , 'store'])->name('categories.store');
+    Route::put('/categories/{category}', [CategoryController::class , 'update'])->name('categories.update');
+    Route::post('/categories/{category}/toggle', [CategoryController::class , 'toggleActive'])->name('categories.toggle');
+    Route::delete('/categories/{category}', [CategoryController::class , 'destroy'])->name('categories.destroy');
+});
+
+// 🔥 TAMBAHAN: MERCHANT REGISTER
 Route::get('/merchant/register', function () {
     return view('merchant.register');
 });
@@ -26,16 +58,15 @@ Route::get('/dashboard', function () {
 
 // 🔥 PROFILE (LOGIN REQUIRED)
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile', [ProfileController::class , 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class , 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class , 'destroy'])->name('profile.destroy');
 });
 
 // 🔥 AUTH ROUTES (LOGIN, REGISTER USER)
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
 
-use Laravel\Socialite\Facades\Socialite;
-
+// 🔥 GOOGLE OAUTH
 Route::get('/auth/google', function () {
     return Socialite::driver('google')->redirect();
 });
