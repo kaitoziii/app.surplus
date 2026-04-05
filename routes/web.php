@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CartController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,4 +45,13 @@ Route::get('/auth/google/callback', function () {
     $user = Socialite::driver('google')->user();
 
     dd($user); // test dulu
+});
+
+Route::post('/cart/add', [CartController::class, 'add']);
+Route::get('/cart', [CartController::class, 'index']);
+Route::put('/cart/{id}', [CartController::class, 'update']);
+Route::delete('/cart/{id}', [CartController::class, 'delete']);
+
+Route::get('/cart-page', function () {
+    return view('cart');
 });
