@@ -55,3 +55,7 @@ Route::delete('/cart/{id}', [CartController::class, 'delete']);
 Route::get('/cart-page', function () {
     return view('cart');
 });
+
+Route::get('/product', function () {
+    return view('product.detail-product');
+});
