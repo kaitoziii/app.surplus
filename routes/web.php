@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CartController;
 use Laravel\Socialite\Facades\Socialite;
+use App\Http\Controllers\ProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -78,18 +79,16 @@ Route::get('/auth/google/callback', function () {
     dd($user);
 });
 
-// 🔥 CART 
-Route::post('/cart/add', [CartController::class, 'add']);
-Route::get('/cart', [CartController::class, 'index']);
-Route::put('/cart/{id}', [CartController::class, 'update']);
-Route::delete('/cart/{id}', [CartController::class, 'delete']);
-
-// 🔥 UI CART
-Route::get('/cart-page', function () {
-    return view('cart');
+// 🔥 CART
+Route::middleware('auth')->group(function () {
+    Route::post('/cart', [CartController::class, 'add'])->name('cart.add');
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
+    Route::post('/cart/delete/{id}', [CartController::class, 'delete'])->name('cart.delete');
 });
 
-// 🔥 UI PRODUCT DETAIL
-Route::get('/product', function () {
-    return view('product.detail-product');
+Route::get('/product/{id}', [ProductController::class, 'show'])->name('product.detail');
+
+Route::get('/favorites', function () {
+    return view('product.favorites-product');
 });

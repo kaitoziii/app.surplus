@@ -9,13 +9,13 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+   public function up()
 {
     Schema::create('carts', function (Blueprint $table) {
         $table->id();
-        $table->string('user_id')->nullable();
-        $table->unsignedBigInteger('product_id');
-        $table->integer('quantity');
+        $table->foreignId('user_id')->constrained()->onDelete('cascade');
+        $table->foreignId('product_id')->constrained()->onDelete('cascade');
+        $table->integer('quantity')->default(1);
         $table->timestamps();
     });
 }

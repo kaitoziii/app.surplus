@@ -98,4 +98,9 @@ class Product extends Model
         return $query->where('pickup_deadline', '<=', now()->addHours($hours))
             ->where('pickup_deadline', '>', now());
     }
+
+    public function carts()
+    {
+    return $this->hasMany(Cart::class);
+    }
 }

@@ -7,63 +7,71 @@ use App\Models\Cart;
 
 class CartController extends Controller
 {
-    // 🛒 1. Tambah ke cart
+    // 🛒 ADD TO CART
     public function add(Request $request)
     {
         $request->validate([
-            'product_id' => 'required|integer',
+            'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1'
         ]);
 
-        $cart = Cart::where('product_id', $request->input('product_id'))->first();
+        $qty = $request->quantity;
+
+        $cart = Cart::where('user_id', auth()->id())
+            ->where('product_id', $request->product_id)
+            ->first();
 
         if ($cart) {
-            $cart->quantity += $request->input('quantity');
-            $cart->save();
+            $cart->quantity += $qty;
         } else {
-            Cart::create([
-                'product_id' => $request->input('product_id'),
-                'quantity' => $request->input('quantity')
-            ]);
+            $cart = new Cart();
+            $cart->user_id = auth()->id();
+            $cart->product_id = $request->product_id;
+            $cart->quantity = $qty;
         }
 
-        // kalau dari web (blade)
-        if ($request->expectsJson()) {
-            return response()->json(['message' => 'Added to cart']);
-        }
+        $cart->save();
 
-        return back()->with('success', 'Produk ditambahkan ke keranjang');
+        // 🔥 FIX UTAMA (biar ga redirect ke cart)
+        return back()->with('success', 'Berhasil ditambahkan ke keranjang');
     }
 
-    // 📦 2. Lihat semua cart
+    // 📄 VIEW CART
     public function index()
     {
-        return Cart::all();
+        $cart = Cart::with('product')
+            ->where('user_id', auth()->id())
+            ->get();
+
+        return view('cart.index', compact('cart'));
     }
 
-    // 🔢 3. Update quantity
+    // 🔄 UPDATE QUANTITY
     public function update(Request $request, $id)
     {
         $request->validate([
             'quantity' => 'required|integer|min:1'
         ]);
 
-        $cart = Cart::findOrFail($id);
-        $cart->quantity = $request->input('quantity');
+        $cart = Cart::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+
+        $cart->quantity = $request->quantity;
         $cart->save();
 
-        if ($request->expectsJson()) {
-            return response()->json(['message' => 'Updated']);
-        }
-
-        return back()->with('success', 'Quantity diupdate');
+        return back()->with('success', 'Cart berhasil diupdate');
     }
 
-    // ❌ 4. Hapus item
+    // ❌ DELETE ITEM
     public function delete($id)
     {
-        Cart::destroy($id);
+        $cart = Cart::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
 
-        return response()->json(['message' => 'Deleted']);
+        $cart->delete();
+
+        return back()->with('success', 'Item berhasil dihapus');
     }
 }
