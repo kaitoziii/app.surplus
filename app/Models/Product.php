@@ -15,6 +15,8 @@ class Product extends Model
         'name',
         'description',
         'original_price',
+        'final_price',
+        'discount_percentage',
         'stock',
         'unit',
         'category',
