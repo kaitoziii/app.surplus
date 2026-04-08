@@ -10,12 +10,12 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// 🔥 HALAMAN UTAMA
+// HALAMAN UTAMA
 Route::get('/', function () {
     return view('welcome');
 });
 
-// 🔥 PRODUCT DASHBOARD (MERCHANT)
+// PRODUCT DASHBOARD (MERCHANT)
 Route::resource('products', ProductController::class);
 
 // 🔥 TAMBAHAN: MERCHANT REGISTER (INI YANG KAMU BUTUH)
