@@ -2,19 +2,16 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-<<<<<<< HEAD
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoryController;
 use Laravel\Socialite\Facades\Socialite;
-=======
 use App\Http\Controllers\CartController;
->>>>>>> feature/cart-stock-checkout
 
 /*
- |--------------------------------------------------------------------------
- | Web Routes
- |--------------------------------------------------------------------------
- */
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
 
 // 🔥 HALAMAN UTAMA
 Route::get('/', function () {
@@ -43,6 +40,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
     Route::get('/transactions/export-pdf', [AdminController::class , 'exportTransactionsPdf'])->name('transactions.export-pdf');
     Route::get('/transactions', [AdminController::class , 'transactions'])->name('transactions');
     Route::get('/transactions/export', [AdminController::class , 'exportTransactions'])->name('transactions.export');
+
     Route::get('/categories', [CategoryController::class , 'index'])->name('categories.index');
     Route::post('/categories', [CategoryController::class , 'store'])->name('categories.store');
     Route::put('/categories/{category}', [CategoryController::class , 'update'])->name('categories.update');
@@ -67,7 +65,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class , 'destroy'])->name('profile.destroy');
 });
 
-// 🔥 AUTH ROUTES (LOGIN, REGISTER USER)
+// 🔥 AUTH ROUTES
 require __DIR__ . '/auth.php';
 
 // 🔥 GOOGLE OAUTH
@@ -77,13 +75,11 @@ Route::get('/auth/google', function () {
 
 Route::get('/auth/google/callback', function () {
     $user = Socialite::driver('google')->user();
-
     dd($user); // test dulu
 });
 
+// 🔥 CART
 Route::post('/cart/add', [CartController::class , 'add']);
 Route::get('/cart', [CartController::class , 'index']);
 Route::put('/cart/{id}', [CartController::class , 'update']);
 Route::delete('/cart/{id}', [CartController::class , 'delete']);
-
-Rou
