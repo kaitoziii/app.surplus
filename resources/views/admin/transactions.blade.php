@@ -4,65 +4,67 @@
 
 @section('content')
 
-{{-- Summary Cards --}}
-<div class="grid grid-cols-4 gap-3 mb-5">
-    <div class="bg-white rounded-xl border border-gray-100 p-4">
+{{-- Stat Cards --}}
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+    <div class="bg-white rounded-xl border border-gray-100 p-4 stat-card">
         <p class="text-xs text-gray-400 mb-1">Total Transaksi</p>
         <p class="text-2xl font-medium text-gray-800">{{ $transactions->total() }}</p>
         <p class="text-xs text-green-600 mt-1">Semua waktu</p>
     </div>
-    <div class="bg-white rounded-xl border border-gray-100 p-4">
-        <p class="text-xs text-gray-400 mb-1">Selesai (Picked Up)</p>
+    <div class="bg-white rounded-xl border border-gray-100 p-4 stat-card">
+        <p class="text-xs text-gray-400 mb-1">Selesai</p>
         <p class="text-2xl font-medium text-green-600">{{ $countPickedUp }}</p>
         <p class="text-xs text-green-500 mt-1">Berhasil diambil</p>
     </div>
-    <div class="bg-white rounded-xl border border-gray-100 p-4">
-        <p class="text-xs text-gray-400 mb-1">Pending / Confirmed</p>
+    <div class="bg-white rounded-xl border border-gray-100 p-4 stat-card">
+        <p class="text-xs text-gray-400 mb-1">Pending</p>
         <p class="text-2xl font-medium text-amber-500">{{ $countActive }}</p>
         <p class="text-xs text-amber-400 mt-1">Sedang berjalan</p>
     </div>
-    <div class="bg-white rounded-xl border border-gray-100 p-4">
+    <div class="bg-white rounded-xl border border-gray-100 p-4 stat-card">
         <p class="text-xs text-gray-400 mb-1">Dibatalkan</p>
         <p class="text-2xl font-medium text-red-500">{{ $countCancelled }}</p>
         <p class="text-xs text-red-400 mt-1">Total dibatalkan</p>
     </div>
 </div>
 
-{{-- Filter & Search --}}
-<div class="bg-white rounded-xl border border-gray-100 p-4 mb-4 flex items-center gap-3">
-    <form method="GET" action="{{ route('admin.transactions') }}" class="flex items-center gap-3 w-full">
-        <select name="status" onchange="this.form.submit()"
-            class="text-xs border border-gray-200 rounded-lg px-3 py-2 text-gray-600 focus:outline-none focus:border-green-400">
-            <option value="">Semua Status</option>
-            <option value="pending"    {{ request('status') === 'pending'    ? 'selected' : '' }}>Pending</option>
-            <option value="confirmed"  {{ request('status') === 'confirmed'  ? 'selected' : '' }}>Confirmed</option>
-            <option value="picked_up"  {{ request('status') === 'picked_up'  ? 'selected' : '' }}>Picked Up</option>
-            <option value="cancelled"  {{ request('status') === 'cancelled'  ? 'selected' : '' }}>Cancelled</option>
-        </select>
-        <input type="date" name="date" value="{{ request('date') }}" onchange="this.form.submit()"
-            class="text-xs border border-gray-200 rounded-lg px-3 py-2 text-gray-600 focus:outline-none focus:border-green-400">
-        @if(request('status') || request('date'))
-        <a href="{{ route('admin.transactions') }}"
-            class="text-xs text-red-400 hover:text-red-600">Reset filter</a>
-        @endif
-        <div class="ml-auto flex items-center gap-3">
-            <span class="text-xs text-gray-400">
-                Menampilkan {{ $transactions->count() }} dari {{ $transactions->total() }} transaksi
+{{-- Filter & Export --}}
+<div class="bg-white rounded-xl border border-gray-100 p-3.5 mb-4">
+    <form method="GET" action="{{ route('admin.transactions') }}">
+        {{-- Baris 1: Filter --}}
+        <div class="flex flex-wrap items-center gap-2 mb-2">
+            <select name="status" onchange="this.form.submit()"
+                class="text-xs border border-gray-200 rounded-lg px-3 py-2 text-gray-600 focus:outline-none focus:border-green-400">
+                <option value="">Semua Status</option>
+                <option value="pending"   {{ request('status') === 'pending'   ? 'selected' : '' }}>Pending</option>
+                <option value="confirmed" {{ request('status') === 'confirmed' ? 'selected' : '' }}>Confirmed</option>
+                <option value="picked_up" {{ request('status') === 'picked_up' ? 'selected' : '' }}>Picked Up</option>
+                <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+            </select>
+            <input type="date" name="date" value="{{ request('date') }}" onchange="this.form.submit()"
+                class="text-xs border border-gray-200 rounded-lg px-3 py-2 text-gray-600 focus:outline-none focus:border-green-400">
+            @if(request('status') || request('date'))
+            <a href="{{ route('admin.transactions') }}" class="text-xs text-red-400 hover:text-red-600">Reset</a>
+            @endif
+            <span class="text-xs text-gray-400 ml-auto">
+                {{ $transactions->count() }}/{{ $transactions->total() }} transaksi
             </span>
+        </div>
+        {{-- Baris 2: Tombol Export --}}
+        <div class="flex gap-2 pt-2 border-t border-gray-50">
             <a href="{{ route('admin.transactions.export', request()->query()) }}"
-                class="flex items-center gap-1.5 text-xs bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                class="flex items-center gap-1.5 bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-green-700">
+                <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                 </svg>
                 Export CSV
             </a>
             <a href="{{ route('admin.transactions.export-pdf', request()->query()) }}"
-                class="flex items-center gap-1.5 bg-red-600 text-white text-xs px-3.5 py-2 rounded-lg hover:bg-red-700">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                    </svg>
-                    Export PDF
+                class="flex items-center gap-1.5 bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-red-700">
+                <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                </svg>
+                Export PDF
             </a>
         </div>
     </form>
@@ -71,7 +73,7 @@
 {{-- Tabel --}}
 <div class="bg-white rounded-xl border border-gray-100">
     <div class="overflow-x-auto">
-        <table class="w-full text-xs">
+        <table class="w-full text-xs min-w-[900px]">
             <thead>
                 <tr class="bg-gray-50 text-gray-400">
                     <th class="text-left px-4 py-3 font-medium">#</th>
@@ -90,7 +92,7 @@
             <tbody class="divide-y divide-gray-50">
                 @forelse($transactions as $trx)
                 <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3 text-gray-400">{{ $trx->id }}</td>
+                    <td class="px-4 py-3 text-gray-400">#{{ $trx->id }}</td>
                     <td class="px-4 py-3">
                         <p class="font-medium text-gray-800">{{ $trx->user->name ?? '-' }}</p>
                         <p class="text-gray-400">{{ $trx->user->email ?? '' }}</p>
@@ -100,13 +102,9 @@
                     <td class="px-4 py-3 text-gray-500">Rp {{ number_format($trx->original_price_snapshot, 0, ',', '.') }}</td>
                     <td class="px-4 py-3 font-medium text-gray-800">Rp {{ number_format($trx->price_paid, 0, ',', '.') }}</td>
                     <td class="px-4 py-3">
-                        <span class="bg-green-50 text-green-700 px-2 py-0.5 rounded-full">
-                            {{ $trx->discount_applied }}%
-                        </span>
+                        <span class="bg-green-50 text-green-700 px-2 py-0.5 rounded-full">{{ $trx->discount_applied }}%</span>
                     </td>
-                    <td class="px-4 py-3 text-green-600 font-medium">
-                        Rp {{ number_format($trx->savings_amount, 0, ',', '.') }}
-                    </td>
+                    <td class="px-4 py-3 text-green-600 font-medium">Rp {{ number_format($trx->savings_amount, 0, ',', '.') }}</td>
                     <td class="px-4 py-3">
                         @if($trx->status === 'picked_up')
                             <span class="bg-green-50 text-green-700 px-2 py-0.5 rounded-full">Picked Up</span>
@@ -119,17 +117,13 @@
                         @endif
                     </td>
                     <td class="px-4 py-3">
-                        <span class="font-mono text-gray-600 bg-gray-50 px-2 py-0.5 rounded">
-                            {{ $trx->pickup_code ?? '-' }}
-                        </span>
+                        <span class="font-mono text-gray-600 bg-gray-50 px-2 py-0.5 rounded">{{ $trx->pickup_code ?? '-' }}</span>
                     </td>
-                    <td class="px-4 py-3 text-gray-400">{{ $trx->created_at->format('d M Y, H:i') }}</td>
+                    <td class="px-4 py-3 text-gray-400 whitespace-nowrap">{{ $trx->created_at->format('d M Y, H:i') }}</td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="11" class="px-4 py-10 text-center text-gray-400">
-                        Belum ada transaksi
-                    </td>
+                    <td colspan="11" class="px-4 py-10 text-center text-gray-400 text-xs">Belum ada transaksi</td>
                 </tr>
                 @endforelse
             </tbody>

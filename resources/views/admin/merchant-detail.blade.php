@@ -11,8 +11,7 @@
     </a>
 </div>
 
-<div class="grid grid-cols-2 gap-4">
-
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
     {{-- Info Merchant --}}
     <div class="bg-white rounded-xl border border-gray-100 p-5">
         <p class="text-xs font-medium text-gray-700 mb-4">Informasi Merchant</p>
@@ -27,7 +26,7 @@
             </div>
             <div>
                 <p class="text-xs text-gray-400">Email</p>
-                <p class="text-sm text-gray-700 mt-0.5">{{ $merchant->user->email ?? '-' }}</p>
+                <p class="text-sm text-gray-700 mt-0.5 break-all">{{ $merchant->user->email ?? '-' }}</p>
             </div>
             <div>
                 <p class="text-xs text-gray-400">Alamat</p>
@@ -35,9 +34,7 @@
             </div>
             <div>
                 <p class="text-xs text-gray-400">Koordinat</p>
-                <p class="text-sm text-gray-700 mt-0.5 font-mono">
-                    {{ $merchant->latitude }}, {{ $merchant->longitude }}
-                </p>
+                <p class="text-sm text-gray-700 mt-0.5 font-mono text-xs break-all">{{ $merchant->latitude }}, {{ $merchant->longitude }}</p>
             </div>
             <div>
                 <p class="text-xs text-gray-400">Bergabung</p>
@@ -50,7 +47,6 @@
     <div class="space-y-4">
         <div class="bg-white rounded-xl border border-gray-100 p-5">
             <p class="text-xs font-medium text-gray-700 mb-4">Status Verifikasi</p>
-
             <div class="mb-3">
                 @if($merchant->status === 'approved')
                     <span class="bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-medium">✓ Disetujui</span>
@@ -60,16 +56,14 @@
                     <span class="bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-xs font-medium">⏳ Menunggu Verifikasi</span>
                 @endif
             </div>
-
             @if($merchant->rejection_reason)
             <div class="bg-red-50 border border-red-100 rounded-lg p-3 mt-2">
                 <p class="text-xs text-red-500 font-medium mb-1">Alasan Penolakan:</p>
                 <p class="text-xs text-red-600">{{ $merchant->rejection_reason }}</p>
             </div>
             @endif
-
             @if($merchant->status === 'pending')
-            <div class="flex gap-2 mt-4">
+            <div class="flex gap-2 mt-4 flex-wrap">
                 <form method="POST" action="{{ route('admin.merchants.approve', $merchant->id) }}">
                     @csrf
                     <button class="bg-green-600 text-white text-xs px-4 py-2 rounded-lg hover:bg-green-700">
@@ -82,22 +76,18 @@
 
         <div class="bg-white rounded-xl border border-gray-100 p-5">
             <p class="text-xs font-medium text-gray-700 mb-4">Dokumen SIUP/NIB</p>
-
             @if($merchant->siup_nib)
             <div class="mb-3">
                 <p class="text-xs text-gray-400">Nomor SIUP/NIB</p>
-                <p class="text-sm font-mono text-gray-800 mt-0.5 bg-gray-50 px-3 py-1.5 rounded-lg inline-block">
-                    {{ $merchant->siup_nib }}
-                </p>
+                <p class="text-sm font-mono text-gray-800 mt-0.5 bg-gray-50 px-3 py-1.5 rounded-lg break-all">{{ $merchant->siup_nib }}</p>
             </div>
             @endif
-
             @if($merchant->siup_nib_file)
             <div>
                 <p class="text-xs text-gray-400 mb-2">File Dokumen</p>
                 <a href="{{ Storage::url($merchant->siup_nib_file) }}" target="_blank"
                    class="flex items-center gap-2 bg-blue-50 text-blue-600 text-xs px-3 py-2 rounded-lg hover:bg-blue-100 w-fit">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z"/>
                     </svg>
                     Lihat / Download Dokumen
