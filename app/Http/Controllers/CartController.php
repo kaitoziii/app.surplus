@@ -4,66 +4,110 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Cart;
+use App\Models\Product;
 
 class CartController extends Controller
 {
-    // 🛒 1. Tambah ke cart
+    // 🛒 Tambah ke cart
     public function add(Request $request)
     {
         $request->validate([
-            'product_id' => 'required|integer',
+            'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1'
         ]);
 
-        $cart = Cart::where('product_id', $request->input('product_id'))->first();
+        $product = Product::findOrFail($request->product_id);
+
+        if ($product->stock <= 0) {
+            return back()->with('error', 'Stok habis');
+        }
+
+        $statusCart = $product->time_remaining_minutes <= 0 ? 'pending_expired' : 'pending';
+
+        $cart = Cart::where('user_id', auth()->id())
+            ->where('product_id', $product->id)
+            ->whereIn('status', ['pending', 'pending_expired'])
+            ->first();
 
         if ($cart) {
-            $cart->quantity += $request->input('quantity');
+            $cart->quantity += $request->quantity;
+            $cart->status = $statusCart;
             $cart->save();
         } else {
             Cart::create([
-                'product_id' => $request->input('product_id'),
-                'quantity' => $request->input('quantity')
+                'user_id' => auth()->id(),
+                'product_id' => $product->id,
+                'quantity' => $request->quantity,
+                'status' => $statusCart,
+                'expired_at' => now()->addMinutes(15)
             ]);
         }
 
-        // kalau dari web (blade)
-        if ($request->expectsJson()) {
-            return response()->json(['message' => 'Added to cart']);
-        }
-
-        return back()->with('success', 'Produk ditambahkan ke keranjang');
+        return back()->with('success', 'Masuk keranjang');
     }
 
-    // 📦 2. Lihat semua cart
+ 
     public function index()
     {
-        return Cart::all();
+    $this->clearExpiredCart();
+
+    $cart = Cart::with('product.store')
+        ->where('user_id', auth()->id())
+        ->whereIn('status', ['pending', 'pending_expired'])
+        ->get()
+        ->filter(fn($item) => $item->product !== null);
+
+    if ($cart->isEmpty()) {
+        return view('cart.index', compact('cart'));
     }
 
-    // 🔢 3. Update quantity
+    $merchant = $cart->first()->product->store;
+
+   
+    $cart = $cart->filter(fn($item) => $item->product->store_id == $merchant->id);
+
+    return view('cart.index', compact('cart', 'merchant'));
+    }
+
+   
     public function update(Request $request, $id)
     {
         $request->validate([
             'quantity' => 'required|integer|min:1'
         ]);
 
-        $cart = Cart::findOrFail($id);
-        $cart->quantity = $request->input('quantity');
+        $cart = Cart::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->whereIn('status', ['pending', 'pending_expired'])
+            ->firstOrFail();
+
+        $cart->quantity = $request->quantity;
         $cart->save();
 
-        if ($request->expectsJson()) {
-            return response()->json(['message' => 'Updated']);
-        }
-
-        return back()->with('success', 'Quantity diupdate');
+        return back()->with('success', 'Cart berhasil diupdate');
     }
 
-    // ❌ 4. Hapus item
     public function delete($id)
     {
-        Cart::destroy($id);
+        $cart = Cart::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->whereIn('status', ['pending', 'pending_expired'])
+            ->firstOrFail();
 
-        return response()->json(['message' => 'Deleted']);
+        $cart->delete();
+
+        return back()->with('success', 'Item berhasil dihapus');
+    }
+
+    public function clearExpiredCart()
+    {
+        $expiredCarts = Cart::where('expired_at', '<', now())
+            ->whereIn('status', ['pending', 'pending_expired'])
+            ->get();
+
+        foreach ($expiredCarts as $cart) {
+            $cart->status = 'expired';
+            $cart->save();
+        }
     }
 }

@@ -22,11 +22,13 @@ class Product extends Model
         'pickup_deadline',
         'image_url',
         'is_available',
+        'reserved_stock',
     ];
 
     protected $casts = [
         'original_price' => 'float',
         'stock' => 'integer',
+        'reserved_stock' => 'integer',
         'expiry_date' => 'date',
         'pickup_deadline' => 'datetime',
         'is_available' => 'boolean',
@@ -37,18 +39,15 @@ class Product extends Model
         'discount_percentage',
         'urgency_level',
         'time_remaining_minutes',
+        'available_stock',
     ];
 
-    public function store()
-    {
-        return $this->belongsTo(Store::class);
-    }
+    // Relasi
+    public function store() { return $this->belongsTo(Store::class); }
+    public function transactions() { return $this->hasMany(Transaction::class); }
+    public function carts() { return $this->hasMany(Cart::class); }
 
-    public function transactions()
-    {
-        return $this->hasMany(Transaction::class);
-    }
-
+    // Dynamic price & discount
     public function getDynamicPriceAttribute(): float
     {
         return app(DynamicDiscountService::class)->calculatePrice($this);
@@ -58,44 +57,53 @@ class Product extends Model
     {
         $dynamicPrice = $this->dynamic_price;
         $originalPrice = $this->original_price;
-
-        if ($originalPrice <= 0) {
-            return 0.0;
-        }
-
-        return round((1 - $dynamicPrice / $originalPrice) * 100, 1);
+        return $originalPrice > 0 ? round((1 - $dynamicPrice / $originalPrice) * 100, 1) : 0;
     }
 
+    // Urgency & time
     public function getUrgencyLevelAttribute(): string
     {
         $minutesLeft = $this->time_remaining_minutes;
-
-        if ($minutesLeft <= 0)
-            return 'expired';
-        if ($minutesLeft <= 60)
-            return 'critical';
-        if ($minutesLeft <= 180)
-            return 'high';
-        if ($minutesLeft <= 360)
-            return 'medium';
+        if ($minutesLeft <= 0) return 'expired';
+        if ($minutesLeft <= 60) return 'critical';
+        if ($minutesLeft <= 180) return 'high';
+        if ($minutesLeft <= 360) return 'medium';
         return 'low';
     }
 
     public function getTimeRemainingMinutesAttribute(): int
     {
-        return (int)now()->diffInMinutes($this->pickup_deadline, false);
+        return (int) now()->diffInMinutes($this->pickup_deadline, false);
     }
 
+    // Stock tersedia
+    public function getAvailableStockAttribute(): int
+    {
+        return max(0, $this->stock - $this->reserved_stock);
+    }
+
+    // Setter agar stock & reserved_stock tidak negatif
+    public function setStockAttribute($value)
+    {
+        $this->attributes['stock'] = max(0, $value);
+    }
+
+    public function setReservedStockAttribute($value)
+    {
+        $this->attributes['reserved_stock'] = max(0, $value);
+    }
+
+    // Scopes
     public function scopeAvailable($query)
     {
         return $query->where('is_available', true)
-            ->where('pickup_deadline', '>', now())
-            ->where('stock', '>', 0);
+                     ->where('pickup_deadline', '>', now())
+                     ->where('stock', '>', 0);
     }
 
     public function scopeUrgent($query, int $hours = 3)
     {
         return $query->where('pickup_deadline', '<=', now()->addHours($hours))
-            ->where('pickup_deadline', '>', now());
+                     ->where('pickup_deadline', '>', now());
     }
 }
