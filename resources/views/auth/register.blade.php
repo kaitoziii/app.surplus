@@ -17,27 +17,38 @@
         </div>
 
         <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+       <div class="mt-4 relative">
+    <x-input-label for="password" :value="__('Password')" />
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
+    <input id="password" type="password" name="password"
+        class="block mt-1 w-full border p-2 pr-10 rounded" required>
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
+    <span onclick="togglePassword('password')" 
+        class="absolute right-3 top-10 cursor-pointer">👁️</span>
+
+    <x-input-error :messages="$errors->get('password')" class="mt-2" />
+</div>
 
         <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
+       <div class="mt-4 relative">
+    <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
 
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
+    <input id="password_confirmation" type="password" name="password_confirmation"
+        class="block mt-1 w-full border p-2 pr-10 rounded" required>
 
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
+    <span onclick="togglePassword('password_confirmation')" 
+        class="absolute right-3 top-10 cursor-pointer">👁️</span>
+
+    <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+</div>
+           <!-- ini buat role -->
+         <div class="mt-4">
+    <label>Pilih Role</label>
+    <select name="role" required>
+        <option value="buyer">buyer</option>
+        <option value="seller">seller</option>
+    </select>
+</div>
 
         <div class="flex items-center justify-end mt-4">
             <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
@@ -48,5 +59,17 @@
                 {{ __('Register') }}
             </x-primary-button>
         </div>
+     
     </form>
+    <script>
+function togglePassword(id) {
+    const input = document.getElementById(id);
+
+    if (input.type === "password") {
+        input.type = "text";
+    } else {
+        input.type = "password";
+    }
+}
+</script>
 </x-guest-layout>

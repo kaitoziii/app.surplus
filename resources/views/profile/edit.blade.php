@@ -5,24 +5,34 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-profile-information-form')
-                </div>
-            </div>
+    <div class="py-8 sm:py-12">
+        <div class="max-w-4xl sm:max-w-5xl lg:max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
+            <div class="bg-white shadow rounded-xl p-4 sm:p-6">
+
+                <!-- ROLE -->
+                <div>
+                    @if(auth()->user()->role == 'seller')
+                        @include('profile.seller')
+                    @else
+                        @include('profile.buyer')
+                    @endif
+                </div>
+
+                <hr class="my-8">
+
+                <!-- PASSWORD -->
+                <div>
                     @include('profile.partials.update-password-form')
                 </div>
-            </div>
 
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
+                <hr class="my-8">
+
+                <!-- DELETE -->
+                <div>
                     @include('profile.partials.delete-user-form')
                 </div>
+
             </div>
         </div>
     </div>

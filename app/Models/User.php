@@ -21,6 +21,9 @@ class User extends Authenticatable
         'longitude',
         'role',
         'avatar_url',
+        'store_proof',
+        'opening_time',
+    'closing_time',
     ];
 
     protected $hidden = [

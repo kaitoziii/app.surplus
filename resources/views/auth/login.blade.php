@@ -44,4 +44,7 @@
             </x-primary-button>
         </div>
     </form>
+    <a href="/auth/google" style="display:block; text-align:center; margin-top:15px; padding:10px; background:red; color:white; border-radius:5px; text-decoration:none;">
+    Login dengan Google
+</a>
 </x-guest-layout>
