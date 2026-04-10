@@ -27,7 +27,6 @@ class AdminController extends Controller
         $todayTransactions = Transaction::whereDate('created_at', $today)->count();
         $todayRevenue      = Transaction::whereDate('created_at', $today)
                                 ->where('status', '!=', 'cancelled')->sum('price_paid');
-
         $weekTransactions  = Transaction::whereBetween('created_at', [$weekStart, $weekEnd])->count();
         $weekRevenue       = Transaction::whereBetween('created_at', [$weekStart, $weekEnd])
                                 ->where('status', '!=', 'cancelled')->sum('price_paid');
@@ -69,17 +68,20 @@ class AdminController extends Controller
     {
         $query = User::where('role', 'buyer')->latest();
 
-        if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('email', 'like', '%' . $request->search . '%');
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%');
             });
         }
 
-        if ($request->status === 'restricted') {
-            $query->where('is_restricted', true);
-        } elseif ($request->status === 'active') {
-            $query->where('is_restricted', false);
+        if ($request->filled('status')) {
+            if ($request->status === 'restricted') {
+                $query->where('is_restricted', true);
+            } elseif ($request->status === 'active') {
+                $query->where('is_restricted', false);
+            }
         }
 
         $consumers = $query->paginate(10);
@@ -90,10 +92,10 @@ class AdminController extends Controller
     {
         $query = Transaction::with(['user', 'product'])->latest();
 
-        if ($request->status) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        if ($request->date) {
+        if ($request->filled('date')) {
             $query->whereDate('created_at', $request->date);
         }
 
@@ -111,31 +113,25 @@ class AdminController extends Controller
     {
         $query = Transaction::with(['user', 'product'])->latest();
 
-        if ($request->status) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        if ($request->date) {
+        if ($request->filled('date')) {
             $query->whereDate('created_at', $request->date);
         }
 
         $transactions = $query->get();
         $filename     = 'laporan-transaksi-' . now()->format('Y-m-d') . '.csv';
-
-        $headers = [
+        $headers      = [
             'Content-Type'        => 'text/csv',
             'Content-Disposition' => "attachment; filename=\"$filename\"",
         ];
 
         $callback = function () use ($transactions) {
             $file = fopen('php://output', 'w');
-
-            fputcsv($file, [
-                'ID', 'Consumer', 'Email', 'Produk',
-                'Qty', 'Harga Asli', 'Harga Bayar',
-                'Diskon (%)', 'Hemat', 'Status',
-                'Pickup Code', 'Tanggal',
-            ]);
-
+            fputcsv($file, ['ID', 'Consumer', 'Email', 'Produk', 'Qty',
+                'Harga Asli', 'Harga Bayar', 'Diskon (%)', 'Hemat',
+                'Status', 'Pickup Code', 'Tanggal']);
             foreach ($transactions as $trx) {
                 fputcsv($file, [
                     $trx->id,
@@ -152,7 +148,6 @@ class AdminController extends Controller
                     $trx->created_at->format('d M Y H:i'),
                 ]);
             }
-
             fclose($file);
         };
 
@@ -163,17 +158,17 @@ class AdminController extends Controller
     {
         $query = Transaction::with(['user', 'product'])->latest();
 
-        if ($request->status) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        if ($request->date) {
+        if ($request->filled('date')) {
             $query->whereDate('created_at', $request->date);
         }
 
-        $transactions   = $query->get();
-        $totalRevenue   = $transactions->where('status', '!=', 'cancelled')->sum('price_paid');
-        $totalSavings   = $transactions->sum('savings_amount');
-        $generatedAt    = now()->format('d M Y, H:i');
+        $transactions = $query->get();
+        $totalRevenue = $transactions->where('status', '!=', 'cancelled')->sum('price_paid');
+        $totalSavings = $transactions->sum('savings_amount');
+        $generatedAt  = now()->format('d M Y, H:i');
 
         $pdf = Pdf::loadView('admin.pdf.transactions', compact(
             'transactions', 'totalRevenue', 'totalSavings', 'generatedAt'
@@ -193,15 +188,11 @@ class AdminController extends Controller
 
     public function rejectMerchant(Request $request, $id)
     {
-        $request->validate([
-            'rejection_reason' => 'required|string|max:500',
-        ]);
-
+        $request->validate(['rejection_reason' => 'required|string|max:500']);
         Store::findOrFail($id)->update([
             'status'           => 'rejected',
             'rejection_reason' => $request->rejection_reason,
         ]);
-
         return back()->with('success', 'Merchant berhasil ditolak.');
     }
 

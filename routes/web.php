@@ -9,6 +9,8 @@ use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
+use Laravel\Socialite\Facades\Socialite;
+use App\Http\Controllers\CartController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,6 +51,21 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
     Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
     Route::post('/categories/{category}/toggle', [CategoryController::class, 'toggleActive'])->name('categories.toggle');
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+    Route::get('/dashboard', [AdminController::class , 'dashboard'])->name('dashboard');
+    Route::get('/merchants', [AdminController::class , 'merchants'])->name('merchants');
+    Route::get('/consumers', [AdminController::class , 'consumers'])->name('consumers');
+    Route::post('/merchants/{id}/approve', [AdminController::class , 'approveMerchant'])->name('merchants.approve');
+    Route::post('/merchants/{id}/reject', [AdminController::class , 'rejectMerchant'])->name('merchants.reject');
+    Route::get('/merchants/{id}', [AdminController::class , 'showMerchant'])->name('merchants.show');
+    Route::get('/transactions/export-pdf', [AdminController::class , 'exportTransactionsPdf'])->name('transactions.export-pdf');
+    Route::get('/transactions', [AdminController::class , 'transactions'])->name('transactions');
+    Route::get('/transactions/export', [AdminController::class , 'exportTransactions'])->name('transactions.export');
+
+    Route::get('/categories', [CategoryController::class , 'index'])->name('categories.index');
+    Route::post('/categories', [CategoryController::class , 'store'])->name('categories.store');
+    Route::put('/categories/{category}', [CategoryController::class , 'update'])->name('categories.update');
+    Route::post('/categories/{category}/toggle', [CategoryController::class , 'toggleActive'])->name('categories.toggle');
+    Route::delete('/categories/{category}', [CategoryController::class , 'destroy'])->name('categories.destroy');
 });
 
 // 🔥 MERCHANT REGISTER
@@ -69,6 +86,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // 🔥 AUTH
+// 🔥 AUTH ROUTES
 require __DIR__ . '/auth.php';
 
 // 🔥 GOOGLE LOGIN
@@ -105,3 +123,11 @@ Route::middleware('auth')->group(function () {
    
 });
 
+    dd($user); // test dulu
+});
+
+// 🔥 CART
+Route::post('/cart/add', [CartController::class , 'add']);
+Route::get('/cart', [CartController::class , 'index']);
+Route::put('/cart/{id}', [CartController::class , 'update']);
+Route::delete('/cart/{id}', [CartController::class , 'delete']);
