@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoryController;
 use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,22 +15,56 @@ use App\Http\Controllers\CartController;
 |--------------------------------------------------------------------------
 */
 
+// ===============================
 // HALAMAN UTAMA
+// ===============================
 Route::get('/', function () {
     return view('welcome');
 });
 
-// 🔥 PRODUCT DASHBOARD (MERCHANT)
+// ===============================
+// DASHBOARD
+// ===============================
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+
+// ===============================
+// MERCHANT (AUTH)
+// ===============================
 Route::middleware('auth')->group(function () {
+
+    // PRODUCT
     Route::resource('products', ProductController::class);
+
+    // ORDER SYSTEM (PAKAI CONTROLLER KAMU)
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::post('/orders/{id}/{status}', [OrderController::class, 'updateStatus'])->name('orders.update');
+
+    // RIWAYAT (sementara)
+    Route::get('/history', function () {
+        return "Halaman Riwayat Penjualan";
+    })->name('history.index');
+
+    // PROFILE
+    Route::get('/profile', [ProfileController::class , 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class , 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class , 'destroy'])->name('profile.destroy');
 });
 
-// 🔥 TAMBAHAN: MERCHANT REGISTER
+
+// ===============================
+// MERCHANT REGISTER
+// ===============================
 Route::get('/merchant/register', function () {
     return view('merchant.register');
 });
 
-// 🔥 LOGIN DEV (OPTIONAL)
+
+// ===============================
+// DEV LOGIN (OPTIONAL)
+// ===============================
 Route::get('/dev-login', function () {
     auth()->loginUsingId(6);
     return redirect('/admin/dashboard');
@@ -40,14 +75,21 @@ Route::get('/dev-logout', function () {
     return 'Logged out';
 });
 
-// 🔥 ADMIN ROUTES
+
+// ===============================
+// ADMIN
+// ===============================
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(function () {
+
     Route::get('/dashboard', [AdminController::class , 'dashboard'])->name('dashboard');
     Route::get('/merchants', [AdminController::class , 'merchants'])->name('merchants');
     Route::get('/consumers', [AdminController::class , 'consumers'])->name('consumers');
+
     Route::post('/merchants/{id}/approve', [AdminController::class , 'approveMerchant'])->name('merchants.approve');
     Route::post('/merchants/{id}/reject', [AdminController::class , 'rejectMerchant'])->name('merchants.reject');
+
     Route::get('/merchants/{id}', [AdminController::class , 'showMerchant'])->name('merchants.show');
+
     Route::get('/transactions', [AdminController::class , 'transactions'])->name('transactions');
     Route::get('/transactions/export', [AdminController::class , 'exportTransactions'])->name('transactions.export');
     Route::get('/transactions/export-pdf', [AdminController::class , 'exportTransactionsPdf'])->name('transactions.export-pdf');
@@ -59,22 +101,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
     Route::delete('/categories/{category}', [CategoryController::class , 'destroy'])->name('categories.destroy');
 });
 
-// 🔥 DASHBOARD
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
-// 🔥 PROFILE
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class , 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class , 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class , 'destroy'])->name('profile.destroy');
-});
-
-// 🔥 AUTH
+// ===============================
+// AUTH
+// ===============================
 require __DIR__ . '/auth.php';
 
-// 🔥 GOOGLE LOGIN
+
+// ===============================
+// GOOGLE LOGIN
+// ===============================
 Route::get('/auth/google', function () {
     return Socialite::driver('google')->redirect();
 });
@@ -84,7 +120,10 @@ Route::get('/auth/google/callback', function () {
     dd($user);
 });
 
-// 🔥 CART
+
+// ===============================
+// CART
+// ===============================
 Route::post('/cart/add', [CartController::class , 'add']);
 Route::get('/cart', [CartController::class , 'index']);
 Route::put('/cart/{id}', [CartController::class , 'update']);

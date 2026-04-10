@@ -1,49 +1,87 @@
-<div class="w-64 bg-green-900 text-white min-h-screen p-4">
+<div class="w-64 bg-[#0f172a] text-gray-200 min-h-screen flex flex-col justify-between">
 
-    <!-- LOGO -->
-    <h2 class="text-xl font-bold mb-6">App.Surplus</h2>
+    <!-- TOP -->
+    <div class="p-5">
 
-    <p class="text-sm text-gray-300 mb-6">Merchant Panel</p>
+        <!-- LOGO -->
+        <div class="flex items-center gap-2 mb-8">
+            <div class="bg-green-500 p-2 rounded-lg">
+                📦
+            </div>
+            <div>
+                <h2 class="font-bold text-lg text-white">App.Surplus</h2>
+                <p class="text-xs text-gray-400">Merchant Panel</p>
+            </div>
+        </div>
 
-    <!-- MENU -->
-    <ul class="space-y-3">
+        <!-- MENU -->
+        <p class="text-xs text-gray-500 mb-3">MENU</p>
 
-        <li>
-            <a href="#" class="block px-3 py-2 rounded-lg bg-green-700">
-                Dashboard
-            </a>
-        </li>
+        <ul class="space-y-2 text-sm">
 
-        <li>
-            <a href="{{ route('products.index') }}" class="block px-3 py-2 hover:bg-green-700 rounded-lg">
-                Produk Saya
-            </a>
-        </li>
+            <li>
+                <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+                    📊 Dashboard
+                </a>
+            </li>
 
-        <li>
-            <a href="{{ route('products.create') }}" class="block px-3 py-2 hover:bg-green-700 rounded-lg">
-                Tambah Produk
-            </a>
-        </li>
+            <li>
+                <a href="{{ route('products.index') }}"
+                   class="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-white">
+                    📦 Produk Saya
+                </a>
+            </li>
 
-        <li>
-            <a href="#" class="block px-3 py-2 hover:bg-green-700 rounded-lg">
-                Pesanan Masuk
-            </a>
-        </li>
+            <li>
+                <a href="{{ route('products.create') }}"
+                   class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+                    ➕ Tambah Produk
+                </a>
+            </li>
 
-        <li>
-            <a href="#" class="block px-3 py-2 hover:bg-green-700 rounded-lg">
-                Riwayat Penjualan
-            </a>
-        </li>
+            <li>
+                <a href="#"
+                   class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+                    📥 Pesanan Masuk
+                </a>
+            </li>
 
-    </ul>
+            <li>
+                <a href="#"
+                   class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+                    📜 Riwayat Penjualan
+                </a>
+            </li>
+
+        </ul>
+    </div>
 
     <!-- USER -->
-    <div class="mt-10 border-t border-green-700 pt-4 text-sm">
-        <p class="font-semibold">Merchant</p>
-        <p class="text-gray-300 text-xs">user@email.com</p>
+    <div class="p-5 border-t border-slate-800">
+
+        <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center font-bold">
+                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+            </div>
+
+            <div>
+                <p class="text-sm font-semibold text-white">
+                    {{ Auth::user()->name }}
+                </p>
+                <p class="text-xs text-gray-400">
+                    {{ Auth::user()->email }}
+                </p>
+            </div>
+        </div>
+
+        <!-- LOGOUT -->
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button class="w-full text-left text-sm text-gray-400 hover:text-red-400 transition">
+                🚪 Logout
+            </button>
+        </form>
+
     </div>
 
 </div>

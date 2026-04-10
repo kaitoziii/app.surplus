@@ -51,6 +51,12 @@ class Product extends Model
         return $this->hasMany(Transaction::class);
     }
 
+    // TAMBAHAN (WAJIB untuk CART)
+    public function carts()
+    {
+        return $this->hasMany(Cart::class);
+    }
+
     public function getDynamicPriceAttribute(): float
     {
         return app(DynamicDiscountService::class)->calculatePrice($this);
