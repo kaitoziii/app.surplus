@@ -8,102 +8,140 @@ use App\Models\Product;
 
 class CartController extends Controller
 {
-    // 1. Tambah ke cart (WITH STOCK CHECK)
+    // 🛒 ADD TO CART
     public function add(Request $request)
     {
         $request->validate([
-            'product_id' => 'required|integer',
+            'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1'
         ]);
 
         $product = Product::findOrFail($request->product_id);
 
-        // CEK STOCK
+        if ($product->stock <= 0) {
+            return back()->with('error', 'Stok habis');
+        }
+
         if ($product->stock < $request->quantity) {
             return back()->with('error', 'Stock tidak cukup!');
         }
 
-        $cart = Cart::where('product_id', $request->product_id)->first();
+        $statusCart = $product->time_remaining_minutes <= 0 ? 'pending_expired' : 'pending';
+
+        $cart = Cart::where('user_id', auth()->id())
+            ->where('product_id', $product->id)
+            ->whereIn('status', ['pending', 'pending_expired'])
+            ->first();
 
         if ($cart) {
             $totalQty = $cart->quantity + $request->quantity;
 
             if ($product->stock < $totalQty) {
-                return back()->with('error', 'Stock tidak mencukupi untuk ditambahkan');
+                return back()->with('error', 'Stock tidak mencukupi');
             }
 
             $cart->quantity = $totalQty;
+            $cart->status = $statusCart;
             $cart->save();
         } else {
             Cart::create([
-                'product_id' => $request->product_id,
-                'quantity' => $request->quantity
+                'user_id' => auth()->id(),
+                'product_id' => $product->id,
+                'quantity' => $request->quantity,
+                'status' => $statusCart,
+                'expired_at' => now()->addMinutes(15)
             ]);
         }
 
-        // OPTIONAL (simple stock lock - langsung kurangi stock)
+        // 🔒 LOCK STOCK
         $product->stock -= $request->quantity;
         $product->save();
-
-        if ($request->expectsJson()) {
-            return response()->json(['message' => 'Added to cart']);
-        }
 
         return back()->with('success', 'Produk ditambahkan ke keranjang');
     }
 
-    // 2. Lihat cart (WEB VIEW)
+    // 📦 VIEW CART
     public function index()
     {
-        $carts = Cart::with('product')->get();
+        $this->clearExpiredCart();
 
-        return view('cart.index', compact('carts'));
+        $cart = Cart::with('product.store')
+            ->where('user_id', auth()->id())
+            ->whereIn('status', ['pending', 'pending_expired'])
+            ->get()
+            ->filter(fn($item) => $item->product !== null);
+
+        if ($cart->isEmpty()) {
+            return view('cart.index', compact('cart'));
+        }
+
+        $merchant = $cart->first()->product->store;
+
+        $cart = $cart->filter(fn($item) => $item->product->store_id == $merchant->id);
+
+        return view('cart.index', compact('cart', 'merchant'));
     }
 
-    // 3. Update quantity (WITH STOCK RETURN)
+    // 🔢 UPDATE CART
     public function update(Request $request, $id)
     {
         $request->validate([
             'quantity' => 'required|integer|min:1'
         ]);
 
-        $cart = Cart::findOrFail($id);
+        $cart = Cart::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->whereIn('status', ['pending', 'pending_expired'])
+            ->firstOrFail();
+
         $product = Product::findOrFail($cart->product_id);
 
-        // MENGEMBALIKAN STOCK LAMA
+        // kembalikan stock lama
         $product->stock += $cart->quantity;
 
-        // CEK STOCK BARU
         if ($product->stock < $request->quantity) {
             return back()->with('error', 'Stock tidak cukup');
         }
 
-        // KURANGI LAGI
+        // kurangi lagi
         $product->stock -= $request->quantity;
         $product->save();
 
         $cart->quantity = $request->quantity;
         $cart->save();
 
-        if ($request->expectsJson()) {
-            return response()->json(['message' => 'Updated']);
-        }
-
-        return back()->with('success', 'Quantity diupdate');
+        return back()->with('success', 'Cart berhasil diupdate');
     }
 
-    // 4. Hapus item (RETURN STOCK)
+    // ❌ DELETE CART
     public function delete($id)
     {
-        $cart = Cart::findOrFail($id);
+        $cart = Cart::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->whereIn('status', ['pending', 'pending_expired'])
+            ->firstOrFail();
+
         $product = Product::findOrFail($cart->product_id);
 
-        // MENGEMBALIKAN STOCK
+        // kembalikan stock
         $product->stock += $cart->quantity;
         $product->save();
 
         $cart->delete();
 
-        return response()->json(['message' => 'Deleted']);
+        return back()->with('success', 'Item berhasil dihapus');
+    }
+
+    // ⏱ CLEAR EXPIRED CART
+    public function clearExpiredCart()
+    {
+        $expiredCarts = Cart::where('expired_at', '<', now())
+            ->whereIn('status', ['pending', 'pending_expired'])
+            ->get();
+
+        foreach ($expiredCarts as $cart) {
+            $cart->status = 'expired';
+            $cart->save();
+        }
     }
 }

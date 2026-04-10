@@ -6,14 +6,28 @@ use Illuminate\Database\Eloquent\Model;
 
 class Cart extends Model
 {
-   protected $fillable = [
+    protected $fillable = [
         'user_id',
         'product_id',
-        'quantity'
+        'quantity',
+        'status',
+        'expired_at',
     ];
 
+    protected $casts = [
+        'expired_at' => 'datetime',
+    ];
+
+    // ===============================
+    // RELATION
+    // ===============================
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

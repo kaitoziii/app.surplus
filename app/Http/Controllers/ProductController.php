@@ -8,11 +8,13 @@ use Carbon\Carbon;
 
 class ProductController extends Controller
 {
+    // ===============================
+    // DASHBOARD MERCHANT
+    // ===============================
     public function index()
     {
         $products = Product::all();
 
-        // STATISTIK MERCHANT
         $totalProducts = $products->count();
 
         $criticalCount = $products->where('urgency_level', 'critical')->count();
@@ -29,25 +31,28 @@ class ProductController extends Controller
         ));
     }
 
+    // ===============================
+    // CREATE
+    // ===============================
     public function create()
     {
         return view('products.create');
     }
 
+    // ===============================
+    // STORE
+    // ===============================
     public function store(Request $request)
     {
         $imagePath = null;
 
-        // Upload gambar
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('products', 'public');
         }
 
-        // HITUNG EXPIRY
         $expiry = Carbon::parse($request->expiry_date);
         $daysLeft = Carbon::now()->diffInDays($expiry, false);
 
-        // AUTO URGENCY + DISKON
         if ($daysLeft <= 1) {
             $urgency = 'critical';
             $discount = 50;
@@ -62,10 +67,8 @@ class ProductController extends Controller
             $discount = 0;
         }
 
-        // HITUNG HARGA AKHIR
         $finalPrice = $request->original_price - ($request->original_price * $discount / 100);
 
-        // SIMPAN DATA
         Product::create([
             'store_id' => 1, // sementara
             'name' => $request->name,
@@ -85,6 +88,13 @@ class ProductController extends Controller
 
         return redirect()->route('products.index');
     }
+
+    // ===============================
+    // DETAIL PRODUK (CONSUMER)
+    // ===============================
+    public function show($id)
+    {
+        $product = Product::findOrFail($id);
+        return view('product.detail-product', compact('product'));
+    }
 }
-
-

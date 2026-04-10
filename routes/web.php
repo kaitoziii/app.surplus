@@ -1,13 +1,14 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoryController;
-use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\CheckoutController;
+use Laravel\Socialite\Facades\Socialite;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,11 +39,11 @@ Route::middleware('auth')->group(function () {
     // PRODUCT
     Route::resource('products', ProductController::class);
 
-    // ORDER SYSTEM (PAKAI CONTROLLER KAMU)
+    // ORDER
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::post('/orders/{id}/{status}', [OrderController::class, 'updateStatus'])->name('orders.update');
 
-    // RIWAYAT (sementara)
+    // HISTORY
     Route::get('/history', function () {
         return "Halaman Riwayat Penjualan";
     })->name('history.index');
@@ -63,7 +64,7 @@ Route::get('/merchant/register', function () {
 
 
 // ===============================
-// DEV LOGIN (OPTIONAL)
+// DEV LOGIN
 // ===============================
 Route::get('/dev-login', function () {
     auth()->loginUsingId(6);
@@ -81,24 +82,23 @@ Route::get('/dev-logout', function () {
 // ===============================
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(function () {
 
-    Route::get('/dashboard', [AdminController::class , 'dashboard'])->name('dashboard');
-    Route::get('/merchants', [AdminController::class , 'merchants'])->name('merchants');
-    Route::get('/consumers', [AdminController::class , 'consumers'])->name('consumers');
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/merchants', [AdminController::class, 'merchants'])->name('merchants');
+    Route::get('/consumers', [AdminController::class, 'consumers'])->name('consumers');
 
-    Route::post('/merchants/{id}/approve', [AdminController::class , 'approveMerchant'])->name('merchants.approve');
-    Route::post('/merchants/{id}/reject', [AdminController::class , 'rejectMerchant'])->name('merchants.reject');
+    Route::post('/merchants/{id}/approve', [AdminController::class, 'approveMerchant'])->name('merchants.approve');
+    Route::post('/merchants/{id}/reject', [AdminController::class, 'rejectMerchant'])->name('merchants.reject');
+    Route::get('/merchants/{id}', [AdminController::class, 'showMerchant'])->name('merchants.show');
 
-    Route::get('/merchants/{id}', [AdminController::class , 'showMerchant'])->name('merchants.show');
+    Route::get('/transactions', [AdminController::class, 'transactions'])->name('transactions');
+    Route::get('/transactions/export', [AdminController::class, 'exportTransactions'])->name('transactions.export');
+    Route::get('/transactions/export-pdf', [AdminController::class, 'exportTransactionsPdf'])->name('transactions.export-pdf');
 
-    Route::get('/transactions', [AdminController::class , 'transactions'])->name('transactions');
-    Route::get('/transactions/export', [AdminController::class , 'exportTransactions'])->name('transactions.export');
-    Route::get('/transactions/export-pdf', [AdminController::class , 'exportTransactionsPdf'])->name('transactions.export-pdf');
-
-    Route::get('/categories', [CategoryController::class , 'index'])->name('categories.index');
-    Route::post('/categories', [CategoryController::class , 'store'])->name('categories.store');
-    Route::put('/categories/{category}', [CategoryController::class , 'update'])->name('categories.update');
-    Route::post('/categories/{category}/toggle', [CategoryController::class , 'toggleActive'])->name('categories.toggle');
-    Route::delete('/categories/{category}', [CategoryController::class , 'destroy'])->name('categories.destroy');
+    Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+    Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+    Route::post('/categories/{category}/toggle', [CategoryController::class, 'toggleActive'])->name('categories.toggle');
+    Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 });
 
 
@@ -117,14 +117,45 @@ Route::get('/auth/google', function () {
 
 Route::get('/auth/google/callback', function () {
     $user = Socialite::driver('google')->user();
-    dd($user);
+    dd($user); // nanti hapus
 });
 
 
 // ===============================
-// CART
+// CART (PAKAI ROUTE LAMA + BARU)
 // ===============================
-Route::post('/cart/add', [CartController::class , 'add']);
-Route::get('/cart', [CartController::class , 'index']);
-Route::put('/cart/{id}', [CartController::class , 'update']);
-Route::delete('/cart/{id}', [CartController::class , 'delete']);
+Route::middleware('auth')->group(function () {
+
+    // 🔥 VERSI LAMA (biar frontend kamu aman)
+    Route::post('/cart/add', [CartController::class , 'add']);
+
+    // 🔥 VERSI BARU (optional)
+    Route::post('/cart', [CartController::class, 'add'])->name('cart.add');
+
+    Route::get('/cart', [CartController::class , 'index'])->name('cart.index');
+    Route::put('/cart/{id}', [CartController::class , 'update'])->name('cart.update');
+    Route::delete('/cart/{id}', [CartController::class , 'delete'])->name('cart.delete');
+});
+
+
+// ===============================
+// PRODUCT DETAIL
+// ===============================
+Route::get('/product/{id}', [ProductController::class, 'show'])->name('product.detail');
+
+
+// ===============================
+// FAVORITES
+// ===============================
+Route::get('/favorites', function () {
+    return view('product.favorites-product');
+});
+
+
+// ===============================
+// CHECKOUT
+// ===============================
+Route::middleware('auth')->group(function () {
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+});
