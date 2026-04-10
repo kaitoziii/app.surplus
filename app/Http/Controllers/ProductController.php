@@ -11,10 +11,9 @@ class ProductController extends Controller
         return "HALAMAN PRODUK";
     }
 
-    // 🔥 TAMBAHKAN INI
     public function show($id)
     {
-        $product = Product::first();
+        $product = Product::findOrFail($id);
         return view('product.detail-product', compact('product'));
     }
 }

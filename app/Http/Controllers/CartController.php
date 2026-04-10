@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Cart;
+use App\Models\Product;
 
 class CartController extends Controller
 {
-    // 🛒 ADD TO CART
+    // 🛒 Tambah ke cart
     public function add(Request $request)
     {
         $request->validate([
@@ -15,38 +16,60 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:1'
         ]);
 
-        $qty = $request->quantity;
+        $product = Product::findOrFail($request->product_id);
+
+        if ($product->stock <= 0) {
+            return back()->with('error', 'Stok habis');
+        }
+
+        $statusCart = $product->time_remaining_minutes <= 0 ? 'pending_expired' : 'pending';
 
         $cart = Cart::where('user_id', auth()->id())
-            ->where('product_id', $request->product_id)
+            ->where('product_id', $product->id)
+            ->whereIn('status', ['pending', 'pending_expired'])
             ->first();
 
         if ($cart) {
-            $cart->quantity += $qty;
+            $cart->quantity += $request->quantity;
+            $cart->status = $statusCart;
+            $cart->save();
         } else {
-            $cart = new Cart();
-            $cart->user_id = auth()->id();
-            $cart->product_id = $request->product_id;
-            $cart->quantity = $qty;
+            Cart::create([
+                'user_id' => auth()->id(),
+                'product_id' => $product->id,
+                'quantity' => $request->quantity,
+                'status' => $statusCart,
+                'expired_at' => now()->addMinutes(15)
+            ]);
         }
 
-        $cart->save();
-
-        // 🔥 FIX UTAMA (biar ga redirect ke cart)
-        return back()->with('success', 'Berhasil ditambahkan ke keranjang');
+        return back()->with('success', 'Masuk keranjang');
     }
 
-    // 📄 VIEW CART
+ 
     public function index()
     {
-        $cart = Cart::with('product')
-            ->where('user_id', auth()->id())
-            ->get();
+    $this->clearExpiredCart();
 
+    $cart = Cart::with('product.store')
+        ->where('user_id', auth()->id())
+        ->whereIn('status', ['pending', 'pending_expired'])
+        ->get()
+        ->filter(fn($item) => $item->product !== null);
+
+    if ($cart->isEmpty()) {
         return view('cart.index', compact('cart'));
     }
 
-    // 🔄 UPDATE QUANTITY
+    $merchant = $cart->first()->product->store;
+
+   
+    $cart = $cart->filter(fn($item) => $item->product->store_id == $merchant->id);
+
+    return view('cart.index', compact('cart', 'merchant'));
+    }
+
+   
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -55,6 +78,7 @@ class CartController extends Controller
 
         $cart = Cart::where('id', $id)
             ->where('user_id', auth()->id())
+            ->whereIn('status', ['pending', 'pending_expired'])
             ->firstOrFail();
 
         $cart->quantity = $request->quantity;
@@ -63,15 +87,27 @@ class CartController extends Controller
         return back()->with('success', 'Cart berhasil diupdate');
     }
 
-    // ❌ DELETE ITEM
     public function delete($id)
     {
         $cart = Cart::where('id', $id)
             ->where('user_id', auth()->id())
+            ->whereIn('status', ['pending', 'pending_expired'])
             ->firstOrFail();
 
         $cart->delete();
 
         return back()->with('success', 'Item berhasil dihapus');
+    }
+
+    public function clearExpiredCart()
+    {
+        $expiredCarts = Cart::where('expired_at', '<', now())
+            ->whereIn('status', ['pending', 'pending_expired'])
+            ->get();
+
+        foreach ($expiredCarts as $cart) {
+            $cart->status = 'expired';
+            $cart->save();
+        }
     }
 }

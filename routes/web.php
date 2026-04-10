@@ -7,6 +7,8 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CartController;
 use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -87,8 +89,19 @@ Route::middleware('auth')->group(function () {
     Route::post('/cart/delete/{id}', [CartController::class, 'delete'])->name('cart.delete');
 });
 
+// 🔥 DETAIL PRODUK
 Route::get('/product/{id}', [ProductController::class, 'show'])->name('product.detail');
 
+// 🔥 FAVORITES
 Route::get('/favorites', function () {
     return view('product.favorites-product');
 });
+
+// 🔥 CHECKOUT
+Route::middleware('auth')->group(function () {
+    // GET checkout page
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+   
+});
+

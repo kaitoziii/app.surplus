@@ -1,4 +1,4 @@
-<div class="bg-teal-500 p-6 rounded-b-3xl text-white">
+<div class="bg-[#7A9B62] p-6 rounded-b-3xl text-white">
 
     <div class="flex justify-between items-center mb-4">
         <div>
