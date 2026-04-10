@@ -8,7 +8,7 @@ use App\Models\Product;
 
 class CartController extends Controller
 {
-    // 🛒 ADD TO CART
+    // ADD TO CART
     public function add(Request $request)
     {
         $request->validate([
@@ -53,14 +53,14 @@ class CartController extends Controller
             ]);
         }
 
-        // 🔒 LOCK STOCK
+        // LOCK STOCK
         $product->stock -= $request->quantity;
         $product->save();
 
         return back()->with('success', 'Produk ditambahkan ke keranjang');
     }
 
-    // 📦 VIEW CART
+    // VIEW CART
     public function index()
     {
         $this->clearExpiredCart();
@@ -82,7 +82,7 @@ class CartController extends Controller
         return view('cart.index', compact('cart', 'merchant'));
     }
 
-    // 🔢 UPDATE CART
+    // UPDATE CART
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -113,7 +113,7 @@ class CartController extends Controller
         return back()->with('success', 'Cart berhasil diupdate');
     }
 
-    // ❌ DELETE CART
+    // DELETE CART
     public function delete($id)
     {
         $cart = Cart::where('id', $id)
