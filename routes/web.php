@@ -35,7 +35,7 @@ Route::get('/dashboard', function () {
 // MERCHANT (AUTH)
 // ===============================
 Route::middleware('auth')->group(function () {
-
+Route::get('/my-orders', [OrderController::class, 'myOrders'])->name('my-orders.index');
     // PRODUCT
     Route::resource('products', ProductController::class);
 

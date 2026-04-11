@@ -37,4 +37,14 @@ class OrderController extends Controller
 
         return view('orders.history', compact('orders'));
     }
+
+    public function myOrders()
+    {
+        $orders = Transaction::with(['product.store'])
+            ->where('user_id', auth()->id())
+            ->latest()
+            ->get();
+
+        return view('orders.my-orders', compact('orders'));
+    }
 }
