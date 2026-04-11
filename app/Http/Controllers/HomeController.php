@@ -13,7 +13,6 @@ class HomeController extends Controller
         $search = $request->search;
 
         $stores = Store::where('status', 'approved')
-            ->where('is_open', true)
             ->withCount(['products as active_products_count' => function ($q) {
                 $q->where('is_available', true)
                   ->where('pickup_deadline', '>', now())

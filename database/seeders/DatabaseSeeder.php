@@ -2,204 +2,125 @@
 
 namespace Database\Seeders;
 
-use App\Models\Product;
-use App\Models\Store;
-use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use App\Models\User;
+use App\Models\Store;
+use App\Models\Product;
+use Carbon\Carbon;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $merchant1 = User::create([
-            'name' => 'Budi Santoso',
-            'email' => 'budi@surplus.id',
-            'password' => Hash::make('password'),
-            'phone' => '08111234567',
-            'role' => 'seller',
-            'latitude' => -6.2088,
-            'longitude' => 106.8456,
+        // ===== ADMIN =====
+        User::updateOrCreate(['email' => 'admin@appsurplus.com'], [
+            'name'              => 'Admin App.Surplus',
+            'password'          => Hash::make('password'),
+            'role'              => 'admin',
+            'email_verified_at' => now(),
         ]);
 
-        $merchant2 = User::create([
-            'name' => 'Sari Dewi',
-            'email' => 'sari@surplus.id',
-            'password' => Hash::make('password'),
-            'phone' => '08222345678',
-            'role' => 'seller',
-            'latitude' => -6.1751,
-            'longitude' => 106.8272,
-        ]);
+        // ===== CONSUMERS (Sidoarjo) =====
+        $consumers = [
+            ['name' => 'Budi Santoso',    'email' => 'budi@gmail.com',    'phone' => '081234567801', 'address' => 'Jl. Jenggolo No. 12, Sidoarjo'],
+            ['name' => 'Siti Rahayu',     'email' => 'siti@gmail.com',    'phone' => '081234567802', 'address' => 'Jl. Pahlawan No. 45, Sidoarjo'],
+            ['name' => 'Rizky Pratama',   'email' => 'rizky@gmail.com',   'phone' => '081234567803', 'address' => 'Jl. Ahmad Yani No. 7, Waru, Sidoarjo'],
+            ['name' => 'Dewi Anggraini',  'email' => 'dewi@gmail.com',    'phone' => '081234567804', 'address' => 'Jl. Raya Gedangan No. 3, Sidoarjo'],
+            ['name' => 'Fajar Nugroho',   'email' => 'fajar@gmail.com',   'phone' => '081234567805', 'address' => 'Perum Taman Pinang Indah, Sidoarjo'],
+        ];
 
-        User::create([
-            'name' => 'Andi Pembeli',
-            'email' => 'andi@surplus.id',
-            'password' => Hash::make('password'),
-            'phone' => '08333456789',
-            'role' => 'buyer',
-            'latitude' => -6.2100,
-            'longitude' => 106.8400,
-        ]);
+        foreach ($consumers as $c) {
+            User::updateOrCreate(['email' => $c['email']], array_merge($c, [
+                'password'          => Hash::make('password'),
+                'role'              => 'consumer',
+                'email_verified_at' => now(),
+            ]));
+        }
 
-        $store1 = Store::create([
-            'user_id' => $merchant1->id,
-            'name' => 'RM Padang Barokah',
-            'address' => 'Jl. Medan Merdeka Barat No. 12, Jakarta Pusat',
-            'latitude' => -6.1754,
-            'longitude' => 106.8272,
-            'category' => 'restaurant',
-            'phone' => '02112345678',
-            'description' => 'Restoran Masakan Padang autentik sejak 1995',
-            'is_open' => true,
-            'open_time' => '08:00:00',
-            'close_time' => '22:00:00',
-        ]);
+        // ===== MERCHANTS (Sidoarjo) =====
+        $merchantUsers = [
+            ['name' => 'Warung Pak Suro',        'email' => 'paksuro@gmail.com',     'phone' => '081234567810', 'address' => 'Jl. Diponegoro No. 88, Sidoarjo'],
+            ['name' => 'Bakery Roti Manis',      'email' => 'rotimanis@gmail.com',   'phone' => '081234567811', 'address' => 'Jl. Monginsidi No. 21, Sidoarjo'],
+            ['name' => 'Cafe Hijau Daun',        'email' => 'hijaudaun@gmail.com',   'phone' => '081234567812', 'address' => 'Jl. Raya Waru No. 15, Waru, Sidoarjo'],
+            ['name' => 'RM Seafood Delta',       'email' => 'seafooddelta@gmail.com','phone' => '081234567813', 'address' => 'Jl. Raya Buduran No. 5, Sidoarjo'],
+            ['name' => 'Toko Kue Bu Endah',      'email' => 'buendah@gmail.com',     'phone' => '081234567814', 'address' => 'Jl. Veteran No. 33, Sidoarjo'],
+        ];
 
-        $store2 = Store::create([
-            'user_id' => $merchant1->id,
-            'name' => 'Sunrise Bakery',
-            'address' => 'Jl. Jend. Sudirman No. 45, Jakarta Selatan',
-            'latitude' => -6.2088,
-            'longitude' => 106.8456,
-            'category' => 'bakery',
-            'phone' => '02123456789',
-            'description' => 'Roti dan kue segar dipanggang setiap hari',
-            'is_open' => true,
-            'open_time' => '06:00:00',
-            'close_time' => '20:00:00',
-        ]);
+        $storeData = [
+            [
+                'name'      => 'Warung Pak Suro',
+                'address'   => 'Jl. Diponegoro No. 88, Sidoarjo',
+                'latitude'  => -7.4478,
+                'longitude' => 112.7183,
+                'status'    => 'approved',
+            ],
+            [
+                'name'      => 'Bakery Roti Manis',
+                'address'   => 'Jl. Monginsidi No. 21, Sidoarjo',
+                'latitude'  => -7.4512,
+                'longitude' => 112.7142,
+                'status'    => 'approved',
+            ],
+            [
+                'name'      => 'Cafe Hijau Daun',
+                'address'   => 'Jl. Raya Waru No. 15, Waru, Sidoarjo',
+                'latitude'  => -7.3895,
+                'longitude' => 112.7734,
+                'status'    => 'approved',
+            ],
+            [
+                'name'      => 'RM Seafood Delta',
+                'address'   => 'Jl. Raya Buduran No. 5, Sidoarjo',
+                'latitude'  => -7.4621,
+                'longitude' => 112.7089,
+                'status'    => 'approved',
+            ],
+            [
+                'name'      => 'Toko Kue Bu Endah',
+                'address'   => 'Jl. Veteran No. 33, Sidoarjo',
+                'latitude'  => -7.4456,
+                'longitude' => 112.7201,
+                'status'    => 'approved',
+            ],
+        ];
 
-        $store3 = Store::create([
-            'user_id' => $merchant2->id,
-            'name' => 'FreshMart Kemang',
-            'address' => 'Jl. Kemang Raya No. 8, Jakarta Selatan',
-            'latitude' => -6.2607,
-            'longitude' => 106.8187,
-            'category' => 'supermarket',
-            'phone' => '02134567890',
-            'description' => 'Supermarket segar dengan produk lokal pilihan',
-            'is_open' => true,
-            'open_time' => '07:00:00',
-            'close_time' => '23:00:00',
-        ]);
+        $stores = [];
+        foreach ($merchantUsers as $i => $m) {
+            $user = User::updateOrCreate(['email' => $m['email']], array_merge($m, [
+                'password'          => Hash::make('password'),
+                'role'              => 'merchant',
+                'email_verified_at' => now(),
+            ]));
 
-        $store4 = Store::create([
-            'user_id' => $merchant2->id,
-            'name' => 'Kopi & Roti Blok M',
-            'address' => 'Blok M Square Lt. 2, Jakarta Selatan',
-            'latitude' => -6.2444,
-            'longitude' => 106.7996,
-            'category' => 'cafe',
-            'phone' => '02145678901',
-            'description' => 'Kopi specialty dan roti artisan',
-            'is_open' => true,
-            'open_time' => '07:00:00',
-            'close_time' => '21:00:00',
-        ]);
+            $store = Store::updateOrCreate(
+                ['user_id' => $user->id],
+                array_merge($storeData[$i], ['user_id' => $user->id])
+            );
+            $stores[] = $store;
+        }
 
-        Product::create([
-            'store_id' => $store1->id,
-            'name' => 'Nasi Padang Komplit',
-            'description' => 'Nasi dengan 5 lauk pilihan, sudah termasuk rendang dan gulai',
-            'original_price' => 45000,
-            'stock' => 15,
-            'unit' => 'porsi',
-            'category' => 'general',
-            'pickup_deadline' => now()->addHours(6),
-            'expiry_date' => now()->toDateString(),
-            'is_available' => true,
-        ]);
+        // ===== PRODUK SURPLUS =====
+        $products = [
+            // Warung Pak Suro
+            ['store_id'=>$stores[0]->id,'name'=>'Nasi Rawon Sisa Sore','description'=>'Rawon khas Sidoarjo, bumbu rempah lengkap, masih hangat.','original_price'=>25000,'discount_price'=>15000,'stock'=>8,'reserved_stock'=>0,'category'=>'general','unit'=>'porsi','pickup_deadline'=>Carbon::now()->addHours(2),'expiry_date'=>Carbon::now()->addDay(),'is_available'=>true],
+            ['store_id'=>$stores[0]->id,'name'=>'Lontong Kupang','description'=>'Makanan khas Sidoarjo dengan kupang segar dan lento.','original_price'=>18000,'discount_price'=>10000,'stock'=>5,'reserved_stock'=>0,'category'=>'general','unit'=>'porsi','pickup_deadline'=>Carbon::now()->addHours(1)->addMinutes(30),'expiry_date'=>Carbon::now()->addDay(),'is_available'=>true],
+            // Bakery Roti Manis
+            ['store_id'=>$stores[1]->id,'name'=>'Roti Tawar Spesial','description'=>'Roti tawar lembut, fresh from oven pagi ini.','original_price'=>20000,'discount_price'=>12000,'stock'=>15,'reserved_stock'=>0,'category'=>'bread','unit'=>'loaf','pickup_deadline'=>Carbon::now()->addHours(3),'expiry_date'=>Carbon::now()->addDays(2),'is_available'=>true],
+            ['store_id'=>$stores[1]->id,'name'=>'Croissant Butter','description'=>'Croissant berlapis butter premium, renyah di luar lembut di dalam.','original_price'=>15000,'discount_price'=>8000,'stock'=>10,'reserved_stock'=>0,'category'=>'bakery','unit'=>'pcs','pickup_deadline'=>Carbon::now()->addHours(4),'expiry_date'=>Carbon::now()->addDay(),'is_available'=>true],
+            // Cafe Hijau Daun
+            ['store_id'=>$stores[2]->id,'name'=>'Smoothie Bowl Buah Segar','description'=>'Smoothie bowl dengan topping granola dan buah tropis.','original_price'=>35000,'discount_price'=>20000,'stock'=>6,'reserved_stock'=>0,'category'=>'beverage','unit'=>'bowl','pickup_deadline'=>Carbon::now()->addHours(2)->addMinutes(30),'expiry_date'=>Carbon::now()->addHours(8),'is_available'=>true],
+            ['store_id'=>$stores[2]->id,'name'=>'Sandwich Ayam Panggang','description'=>'Sandwich dengan ayam panggang, selada, tomat, dan saus spesial.','original_price'=>28000,'discount_price'=>16000,'stock'=>4,'reserved_stock'=>0,'category'=>'general','unit'=>'pcs','pickup_deadline'=>Carbon::now()->addHours(5),'expiry_date'=>Carbon::now()->addDay(),'is_available'=>true],
+            // RM Seafood Delta
+            ['store_id'=>$stores[3]->id,'name'=>'Udang Goreng Tepung','description'=>'Udang segar delta Sidoarjo, goreng tepung renyah.','original_price'=>45000,'discount_price'=>28000,'stock'=>3,'reserved_stock'=>0,'category'=>'seafood','unit'=>'porsi','pickup_deadline'=>Carbon::now()->addHours(1)->addMinutes(45),'expiry_date'=>Carbon::now()->addHours(6),'is_available'=>true],
+            ['store_id'=>$stores[3]->id,'name'=>'Cumi Bakar Bumbu Kecap','description'=>'Cumi segar ukuran jumbo, dibakar dengan bumbu kecap manis.','original_price'=>55000,'discount_price'=>35000,'stock'=>5,'reserved_stock'=>0,'category'=>'seafood','unit'=>'porsi','pickup_deadline'=>Carbon::now()->addHours(3)->addMinutes(30),'expiry_date'=>Carbon::now()->addDay(),'is_available'=>true],
+            // Toko Kue Bu Endah
+            ['store_id'=>$stores[4]->id,'name'=>'Klepon Isi Gula Merah','description'=>'Klepon tradisional khas Jawa, isi gula merah, balur kelapa parut.','original_price'=>12000,'discount_price'=>7000,'stock'=>20,'reserved_stock'=>0,'category'=>'bakery','unit'=>'pack (10 pcs)','pickup_deadline'=>Carbon::now()->addHours(6),'expiry_date'=>Carbon::now()->addDay(),'is_available'=>true],
+            ['store_id'=>$stores[4]->id,'name'=>'Lapis Legit Spesial','description'=>'Lapis legit dengan 18 lapisan, harum rempah kayu manis.','original_price'=>65000,'discount_price'=>40000,'stock'=>2,'reserved_stock'=>0,'category'=>'bakery','unit'=>'loyang kecil','pickup_deadline'=>Carbon::now()->addHours(8),'expiry_date'=>Carbon::now()->addDays(3),'is_available'=>true],
+        ];
 
-        Product::create([
-            'store_id' => $store1->id,
-            'name' => 'Gulai Ayam Porsi Besar',
-            'description' => 'Gulai ayam khas Padang, bumbu rempah pilihan',
-            'original_price' => 25000,
-            'stock' => 35,
-            'unit' => 'porsi',
-            'category' => 'meat',
-            'pickup_deadline' => now()->addHours(3),
-            'expiry_date' => now()->toDateString(),
-            'is_available' => true,
-        ]);
-
-        Product::create([
-            'store_id' => $store3->id,
-            'name' => 'Susu Segar Full Cream 1L',
-            'description' => 'Susu segar pasteurisasi, mendekati tanggal expired',
-            'original_price' => 22000,
-            'stock' => 60,
-            'unit' => 'botol',
-            'category' => 'dairy',
-            'pickup_deadline' => now()->addHours(2),
-            'expiry_date' => now()->toDateString(),
-            'is_available' => true,
-        ]);
-
-        Product::create([
-            'store_id' => $store3->id,
-            'name' => 'Ikan Salmon Fillet 500gr',
-            'description' => 'Salmon segar impor, siap masak',
-            'original_price' => 85000,
-            'stock' => 8,
-            'unit' => 'pack',
-            'category' => 'seafood',
-            'pickup_deadline' => now()->addMinutes(90),
-            'expiry_date' => now()->toDateString(),
-            'is_available' => true,
-        ]);
-
-        Product::create([
-            'store_id' => $store2->id,
-            'name' => 'Roti Tawar Gandum',
-            'description' => 'Roti tawar gandum utuh, dibuat fresh pagi ini',
-            'original_price' => 18000,
-            'stock' => 80,
-            'unit' => 'loaf',
-            'category' => 'bakery',
-            'pickup_deadline' => now()->addHours(4),
-            'expiry_date' => now()->addDay()->toDateString(),
-            'is_available' => true,
-        ]);
-
-        Product::create([
-            'store_id' => $store2->id,
-            'name' => 'Croissant Mentega Original',
-            'description' => 'Croissant berlapis mentega Prancis, crispy di luar lembut di dalam',
-            'original_price' => 32000,
-            'stock' => 5,
-            'unit' => 'pcs',
-            'category' => 'bakery',
-            'pickup_deadline' => now()->addMinutes(45),
-            'expiry_date' => now()->toDateString(),
-            'is_available' => true,
-        ]);
-
-        Product::create([
-            'store_id' => $store4->id,
-            'name' => 'Cold Brew Coffee 500ml',
-            'description' => 'Cold brew 18 jam, kopi Gayo Aceh premium',
-            'original_price' => 55000,
-            'stock' => 12,
-            'unit' => 'botol',
-            'category' => 'beverage',
-            'pickup_deadline' => now()->addHours(5),
-            'expiry_date' => now()->addDays(2)->toDateString(),
-            'is_available' => true,
-        ]);
-
-        Product::create([
-            'store_id' => $store3->id,
-            'name' => 'Paket Sayur Segar Mix 1kg',
-            'description' => 'Bayam, kangkung, wortel, buncis, segar dari kebun',
-            'original_price' => 15000,
-            'stock' => 25,
-            'unit' => 'paket',
-            'category' => 'produce',
-            'pickup_deadline' => now()->addHours(3)->addMinutes(30),
-            'expiry_date' => now()->addDay()->toDateString(),
-            'is_available' => true,
-        ]);
+        foreach ($products as $p) {
+            Product::create($p);
+        }
     }
 }
