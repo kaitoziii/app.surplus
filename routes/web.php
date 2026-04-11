@@ -19,9 +19,9 @@ use Laravel\Socialite\Facades\Socialite;
 // ===============================
 // HALAMAN UTAMA
 // ===============================
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [HomeController::class, 'index'])
+    ->middleware('auth')
+    ->name('home');
 
 // ===============================
 // DASHBOARD
