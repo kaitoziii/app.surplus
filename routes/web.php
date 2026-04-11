@@ -1,21 +1,69 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CartController;
-use Laravel\Socialite\Facades\Socialite;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\CheckoutController;
+use Laravel\Socialite\Facades\Socialite;
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
 
-// 🔥 HALAMAN UTAMA
-Route::get('/', function () {
-    return view('welcome');
+// ===============================
+// HALAMAN UTAMA
+// ===============================
+Route::get('/', [HomeController::class, 'index'])
+    ->middleware('auth')
+    ->name('home');
+
+// ===============================
+// DASHBOARD
+// ===============================
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+
+// ===============================
+// MERCHANT (AUTH)
+// ===============================
+Route::middleware('auth')->group(function () {
+
+    // PRODUCT
+    Route::resource('products', ProductController::class);
+
+    // ORDER
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::patch('/orders/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+
+    // HISTORY
+    Route::get('/history', [OrderController::class, 'history'])->name('history.index');
+
+    // PROFILE
+    Route::get('/profile', [ProfileController::class , 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class , 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class , 'destroy'])->name('profile.destroy');
 });
 
-// 🔥 DEV LOGIN
+
+// ===============================
+// MERCHANT REGISTER
+// ===============================
+Route::get('/merchant/register', function () {
+    return view('merchant.register');
+});
+
+
+// ===============================
+// DEV LOGIN
+// ===============================
 Route::get('/dev-login', function () {
     auth()->loginUsingId(6);
     return redirect('/admin/dashboard');
@@ -26,8 +74,12 @@ Route::get('/dev-logout', function () {
     return 'Logged out';
 });
 
-// 🔥 ADMIN
+
+// ===============================
+// ADMIN
+// ===============================
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(function () {
+
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/merchants', [AdminController::class, 'merchants'])->name('merchants');
     Route::get('/consumers', [AdminController::class, 'consumers'])->name('consumers');
@@ -47,53 +99,60 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 });
 
-// 🔥 MERCHANT REGISTER
-Route::get('/merchant/register', function () {
-    return view('merchant.register');
-});
 
-// 🔥 DASHBOARD
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-// 🔥 PROFILE
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
-// 🔥 AUTH
+// ===============================
+// AUTH
+// ===============================
 require __DIR__ . '/auth.php';
 
-// 🔥 GOOGLE LOGIN
+
+// ===============================
+// GOOGLE LOGIN
+// ===============================
 Route::get('/auth/google', function () {
     return Socialite::driver('google')->redirect();
 });
 
 Route::get('/auth/google/callback', function () {
     $user = Socialite::driver('google')->user();
-    dd($user);
+    dd($user); // nanti hapus
 });
 
-// 🔥 CART
+
+// ===============================
+// CART (PAKAI ROUTE LAMA + BARU)
+// ===============================
 Route::middleware('auth')->group(function () {
+
+    // VERSI LAMA
+    Route::post('/cart/add', [CartController::class , 'add']);
+
+    // VERSI BARU
     Route::post('/cart', [CartController::class, 'add'])->name('cart.add');
-    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-    Route::post('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
-    Route::post('/cart/delete/{id}', [CartController::class, 'delete'])->name('cart.delete');
+
+    Route::get('/cart', [CartController::class , 'index'])->name('cart.index');
+    Route::put('/cart/{id}', [CartController::class , 'update'])->name('cart.update');
+    Route::delete('/cart/{id}', [CartController::class , 'delete'])->name('cart.delete');
 });
 
-// 🔥 DETAIL PRODUK
+
+// ===============================
+// PRODUCT DETAIL
+// ===============================
 Route::get('/product/{id}', [ProductController::class, 'show'])->name('product.detail');
 
-// 🔥 FAVORITES
+
+// ===============================
+// FAVORITES
+// ===============================
 Route::get('/favorites', function () {
     return view('product.favorites-product');
 });
 
-// 🔥 CHECKOUT
+
+// ===============================
+// CHECKOUT
+// ===============================
 Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
