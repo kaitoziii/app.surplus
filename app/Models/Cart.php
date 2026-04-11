@@ -7,12 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 class Cart extends Model
 {
     protected $fillable = [
-        'user_id',       // siapa pemilik
-        'product_id',    // produk yang dibeli
-        'quantity',      // jumlah yang dibeli
-        'status'         // pending / completed / expired
+        'user_id',
+        'product_id',
+        'quantity',
+        'status',
+        'expired_at',
     ];
 
+    protected $casts = [
+        'expired_at' => 'datetime',
+    ];
+
+    // ===============================
+    // RELATION
+    // ===============================
     public function product()
     {
         return $this->belongsTo(Product::class);
