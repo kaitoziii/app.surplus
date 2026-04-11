@@ -7,31 +7,21 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
-<<<<<<< HEAD
 use App\Http\Controllers\HomeController;
-=======
 use App\Http\Controllers\CheckoutController;
 use Laravel\Socialite\Facades\Socialite;
->>>>>>> fa7f14c74a6718eb516e55f1488e07771c3e568c
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 */
 
-<<<<<<< HEAD
-// 🔥 HALAMAN UTAMA
-Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/store/{id}', [HomeController::class, 'storeDetail'])->name('store.detail');
-=======
 // ===============================
 // HALAMAN UTAMA
 // ===============================
 Route::get('/', function () {
     return view('welcome');
 });
->>>>>>> fa7f14c74a6718eb516e55f1488e07771c3e568c
 
 // ===============================
 // DASHBOARD
@@ -166,15 +156,4 @@ Route::get('/favorites', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
-<<<<<<< HEAD
-
 });
-
-// 🔥 CART
-Route::post('/cart/add', [CartController::class , 'add']);
-Route::get('/cart', [CartController::class , 'index']);
-Route::put('/cart/{id}', [CartController::class , 'update']);
-Route::delete('/cart/{id}', [CartController::class , 'delete']);
-=======
-});
->>>>>>> fa7f14c74a6718eb516e55f1488e07771c3e568c
