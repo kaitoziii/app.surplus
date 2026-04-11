@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\Product;
+use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
@@ -24,7 +25,7 @@ class CartController extends Controller
 
         $statusCart = $product->time_remaining_minutes <= 0 ? 'pending_expired' : 'pending';
 
-        $cart = Cart::where('user_id', auth()->id())
+        $cart = Cart::where('user_id', Auth::id())
             ->where('product_id', $product->id)
             ->whereIn('status', ['pending', 'pending_expired'])
             ->first();
@@ -35,7 +36,7 @@ class CartController extends Controller
             $cart->save();
         } else {
             Cart::create([
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
                 'product_id' => $product->id,
                 'quantity' => $request->quantity,
                 'status' => $statusCart,
@@ -52,7 +53,7 @@ class CartController extends Controller
     $this->clearExpiredCart();
 
     $cart = Cart::with('product.store')
-        ->where('user_id', auth()->id())
+        ->where('user_id', Auth::id())
         ->whereIn('status', ['pending', 'pending_expired'])
         ->get()
         ->filter(fn($item) => $item->product !== null);
@@ -77,7 +78,7 @@ class CartController extends Controller
         ]);
 
         $cart = Cart::where('id', $id)
-            ->where('user_id', auth()->id())
+            ->where('user_id', Auth::id())
             ->whereIn('status', ['pending', 'pending_expired'])
             ->firstOrFail();
 
@@ -90,7 +91,7 @@ class CartController extends Controller
     public function delete($id)
     {
         $cart = Cart::where('id', $id)
-            ->where('user_id', auth()->id())
+            ->where('user_id', Auth::id())
             ->whereIn('status', ['pending', 'pending_expired'])
             ->firstOrFail();
 

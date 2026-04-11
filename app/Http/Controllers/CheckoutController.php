@@ -5,12 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\Product;
+use Illuminate\Support\Facades\Auth;
 
 class CheckoutController extends Controller
 {
     public function index()
     {
-        $userId = auth()->id();
+        $userId = Auth::id();
 
         $cartItems = Cart::with('product.store')
             ->where('user_id', $userId)
@@ -49,7 +50,7 @@ class CheckoutController extends Controller
             'transfer_proof' => 'nullable'
         ]);
 
-        $userId = auth()->id();
+        $userId = $userId = Auth::id();
 
         $cartItems = Cart::with('product')
             ->where('user_id', $userId)

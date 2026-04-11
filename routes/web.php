@@ -37,12 +37,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/merchants', [AdminController::class, 'merchants'])->name('merchants');
     Route::get('/consumers', [AdminController::class, 'consumers'])->name('consumers');
+
     Route::post('/merchants/{id}/approve', [AdminController::class, 'approveMerchant'])->name('merchants.approve');
     Route::post('/merchants/{id}/reject', [AdminController::class, 'rejectMerchant'])->name('merchants.reject');
     Route::get('/merchants/{id}', [AdminController::class, 'showMerchant'])->name('merchants.show');
-    Route::get('/transactions/export-pdf', [AdminController::class, 'exportTransactionsPdf'])->name('transactions.export-pdf');
+
     Route::get('/transactions', [AdminController::class, 'transactions'])->name('transactions');
     Route::get('/transactions/export', [AdminController::class, 'exportTransactions'])->name('transactions.export');
+    Route::get('/transactions/export-pdf', [AdminController::class, 'exportTransactionsPdf'])->name('transactions.export-pdf');
 
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
     Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
@@ -68,7 +70,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// 🔥 AUTH
+// 🔥 AUTH ROUTES
 require __DIR__ . '/auth.php';
 
 // 🔥 GOOGLE LOGIN
@@ -104,4 +106,3 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
    
 });
-
