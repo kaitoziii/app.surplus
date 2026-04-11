@@ -10,18 +10,12 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
-
 // 🔥 HALAMAN UTAMA
 Route::get('/', function () {
     return view('welcome');
 });
 
-// Login sementara untuk testing (hapus nanti)
+// 🔥 DEV LOGIN
 Route::get('/dev-login', function () {
     auth()->loginUsingId(6);
     return redirect('/admin/dashboard');
@@ -70,7 +64,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// 🔥 AUTH ROUTES
+// 🔥 AUTH
 require __DIR__ . '/auth.php';
 
 // 🔥 GOOGLE LOGIN
@@ -101,8 +95,6 @@ Route::get('/favorites', function () {
 
 // 🔥 CHECKOUT
 Route::middleware('auth')->group(function () {
-    // GET checkout page
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
-   
 });
