@@ -64,15 +64,25 @@ Route::get('/merchant/register', function () {
 // ===============================
 // DEV LOGIN
 // ===============================
-Route::get('/dev-login', function () {
-    auth()->loginUsingId(6);
+Route::get('/dev-login/admin', function () {
+    auth()->loginUsingId(1);
     return redirect('/admin/dashboard');
-});
+})->name('dev.admin');
+
+Route::get('/dev-login/consumer', function () {
+    auth()->loginUsingId(2);
+    return redirect('/');
+})->name('dev.consumer');
+
+Route::get('/dev-login/merchant', function () {
+    auth()->loginUsingId(3);
+    return redirect('/products');
+})->name('dev.merchant');
 
 Route::get('/dev-logout', function () {
     auth()->logout();
-    return 'Logged out';
-});
+    return redirect('/login');
+})->name('dev.logout');
 
 
 // ===============================
@@ -157,3 +167,5 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 });
+
+Route::get('/store/{id}', [HomeController::class, 'storeDetail'])->name('store.detail');
