@@ -1,58 +1,84 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Surplus API - Food Waste Reduction Platform
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Surplus adalah backend API untuk platform manajemen stok makanan yang bertujuan mengurangi pemborosan makanan (food waste) melalui teknologi **Dynamic Discounting** dan pencarian berbasis lokasi (**Geo-discovery**).
 
-## About Laravel
+## Fitur Utama
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Real-time Dynamic Discounting**: Menghitung harga diskon secara otomatis berdasarkan sisa waktu (expiry), jumlah stok, dan kategori produk.
+- **Geo-discovery Engine**: Memungkinkan pengguna menemukan toko terdekat yang memiliki surplus makanan dalam radius tertentu.
+- **Product Management**: Katalog produk dengan filter urgensi (mendekati batas waktu penjemputan).
+- **Cart System**: API lengkap untuk manajemen keranjang belanja.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Teknologi
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Backend**: Laravel 11/13
+- **Database**: MySQL/PostgreSQL
+- **AI/ML Logic**:
+  - `DynamicDiscountService`: Algoritma diskon multi-faktor.
+  - `GeospatialService`: Spherical distance (Haversine) calculation.
 
-## Learning Laravel
+## Instalasi
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+1. **Clone repositori**:
+   ```bash
+   git clone <repository-url>
+   cd surplus-api
+   ```
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+2. **Install dependensi**:
+   ```bash
+   composer install
+   npm install
+   ```
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+3. **Konfigurasi Environment**:
+   ```bash
+   cp .env.example .env
+   # Update DB_DATABASE, DB_USERNAME, DB_PASSWORD di .env
+   ```
 
-## Agentic Development
+4. **Generate Key & Migrate**:
+   ```bash
+   php artisan key:generate
+   php artisan migrate --seed
+   ```
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+5. **Jalankan Aplikasi**:
+   ```bash
+   php artisan serve
+   ```
 
-```bash
-composer require laravel/boost --dev
+## Dokumentasi AI
 
-php artisan boost:install
-```
+### 1. Dynamic Discounting AI
+Logic ini secara otomatis menurunkan harga produk saat mendekati batas waktu penjemputan (*pickup deadline*).
+- **Path**: [`app/Services/DynamicDiscountService.php`](file:///home/kaito/Documents/capstone%20surplus%20v2/surplus-api/app/Services/DynamicDiscountService.php)
+- **Cara Kerja**:
+  - `Time Factor`: Diskon meningkat secara eksponensial seiring waktu berjalan menuju deadline.
+  - `Stock Factor`: Stok melimpah mendapatkan diskon tambahan untuk mempercepat penjualan.
+  - `Category Multiplier`: Kategori sensitif (sapi, susu, ikan) mendapatkan prioritas diskon lebih tinggi.
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Geo-discovery Engine
+Menemukan toko terdekat dalam radius tertentu menggunakan koordinat GPS.
+- **Path**: [`app/Services/GeospatialService.php`](file:///home/kaito/Documents/capstone%20surplus%20v2/surplus-api/app/Services/GeospatialService.php)
+- **Cara Kerja**: Menggunakan formula Haversine untuk menghitung jarak di atas permukaan bumi yang melengkung.
 
-## Contributing
+## API Endpoints Utama
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Dashboard (Consumer)
+- `GET /api/dashboard/consumer`: Memberikan statistik penghematan, dampak lingkungan (CO2), transaksi terbaru, dan rekomendasi produk terdekat.
+  - *Note*: Memerlukan autentikasi (Bearer Token).
 
-## Code of Conduct
+### Products
+- `GET /api/products/urgent`: Daftar produk paling mendesak (deadline < 3 jam).
+- `GET /api/products/{id}`: Detail produk dengan breakdown diskon.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Stores
+- `GET /api/stores/nearby?lat={lat}&lon={lon}&radius={km}`: Daftar toko terdekat.
 
-## Security Vulnerabilities
+### AI Specialized
+- `POST /api/ai/discount-calculator`: Simulasi perhitungan diskon tanpa perlu database.
+- `GET /api/ai/paths`: List path implementasi AI dalam project.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+Dikembangkan untuk Capstone Project Team CC26-PS097.
