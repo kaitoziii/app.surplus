@@ -30,7 +30,12 @@
     src="{{ $user->avatar_url ? asset('storage/'.$user->avatar_url) : '' }}"
     class="w-24 h-24 object-cover rounded mb-2">
     <input type="file" name="avatar" onchange="previewImage(event)">
-</div>
+
+  @if($user->avatar_url)
+        <p class="text-sm text-green-600 mt-1">
+            File sudah tersimpan ✔
+        </p>
+    @endif</div>
 
     <!-- BUKTI -->
     <div>
@@ -41,6 +46,11 @@
     class="w-24 h-24 object-cover rounded mb-2">
 
     <input type="file" name="store_proof" onchange="previewProof(event)">
+  @if($user->store_proof)
+        <p class="text-sm text-green-600 mt-1">
+            File sudah tersimpan ✔
+        </p>
+    @endif
 </div>
 
 </div>
