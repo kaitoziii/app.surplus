@@ -9,8 +9,7 @@ use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
-use Laravel\Socialite\Facades\Socialite;
-use App\Http\Controllers\CartController;
+use App\Http\Controllers\HomeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,9 +18,8 @@ use App\Http\Controllers\CartController;
 */
 
 // 🔥 HALAMAN UTAMA
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/store/{id}', [HomeController::class, 'storeDetail'])->name('store.detail');
 
 // Login sementara untuk testing (hapus nanti)
 Route::get('/dev-login', function () {
@@ -117,13 +115,9 @@ Route::get('/favorites', function () {
 
 // 🔥 CHECKOUT
 Route::middleware('auth')->group(function () {
-    // GET checkout page
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
-   
-});
 
-    dd($user); // test dulu
 });
 
 // 🔥 CART
