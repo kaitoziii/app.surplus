@@ -9,18 +9,32 @@ class OrderController extends Controller
 {
     public function index()
     {
-        $orders = Transaction::with('product')->latest()->get();
+        $orders = Transaction::with(['product', 'user'])->latest()->get();
 
         return view('orders.index', compact('orders'));
     }
 
-    public function updateStatus($id, $status)
+    public function updateStatus(Request $request, $id)
     {
-        $order = Transaction::findOrFail($id);
+        $request->validate([
+            'status' => 'required|in:siap diambil,sedang dikirim,selesai',
+        ]);
 
-        $order->status = $status;
+        $order = Transaction::findOrFail($id);
+        $order->status = $request->status;
         $order->save();
 
-        return back();
+        return redirect()->route('orders.index')
+            ->with('success', 'Status pesanan berhasil diperbarui.');
+    }
+
+    public function history()
+    {
+        $orders = Transaction::with(['product', 'user'])
+            ->where('status', 'selesai')
+            ->latest()
+            ->get();
+
+        return view('orders.history', compact('orders'));
     }
 }

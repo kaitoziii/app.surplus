@@ -1,12 +1,5 @@
 <x-app-layout>
-
-<div class="flex">
-
-    <!-- SIDEBAR -->
-    <aside class="w-64">
-        @include('layouts.sidebar')
-    </aside>
-
+    
     <!-- CONTENT -->
     <main class="flex-1 bg-gray-100 min-h-screen p-6">
 

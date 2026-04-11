@@ -41,12 +41,10 @@ Route::middleware('auth')->group(function () {
 
     // ORDER
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-    Route::post('/orders/{id}/{status}', [OrderController::class, 'updateStatus'])->name('orders.update');
+    Route::patch('/orders/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
 
     // HISTORY
-    Route::get('/history', function () {
-        return "Halaman Riwayat Penjualan";
-    })->name('history.index');
+    Route::get('/history', [OrderController::class, 'history'])->name('history.index');
 
     // PROFILE
     Route::get('/profile', [ProfileController::class , 'edit'])->name('profile.edit');
@@ -126,10 +124,10 @@ Route::get('/auth/google/callback', function () {
 // ===============================
 Route::middleware('auth')->group(function () {
 
-    // 🔥 VERSI LAMA (biar frontend kamu aman)
+    // VERSI LAMA
     Route::post('/cart/add', [CartController::class , 'add']);
 
-    // 🔥 VERSI BARU (optional)
+    // VERSI BARU
     Route::post('/cart', [CartController::class, 'add'])->name('cart.add');
 
     Route::get('/cart', [CartController::class , 'index'])->name('cart.index');
